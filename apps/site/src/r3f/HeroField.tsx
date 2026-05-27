@@ -621,11 +621,18 @@ export function HeroField({ frozen = false, dialog = false }: HeroFieldProps) {
         -((e.clientY / window.innerHeight) * 2 - 1),
       );
     };
-    // click-and-hold to orbit (mouse only — touch stays for scrolling)
+    // click-and-hold to orbit (mouse only — touch stays for scrolling).
+    // Disabled in dialog mode so case-study text stays interactive.
     const onDown = (e: PointerEvent) => {
-      if (e.pointerType === 'mouse') dragging.current = true;
+      if (e.pointerType !== 'mouse') return;
+      if (document.documentElement.dataset.field === 'dialog') return;
+      dragging.current = true;
+      document.body.style.cursor = 'grabbing';
     };
-    const onUp = () => { dragging.current = false; };
+    const onUp = () => {
+      dragging.current = false;
+      document.body.style.cursor = '';
+    };
     window.addEventListener('pointermove', onMove, { passive: true });
     window.addEventListener('pointerdown', onDown, { passive: true });
     window.addEventListener('pointerup', onUp, { passive: true });

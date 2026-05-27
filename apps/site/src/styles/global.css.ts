@@ -144,6 +144,14 @@ globalStyle('.grain', {
 /* page content sits above the field + mute overlay */
 globalStyle('main, footer', { position: 'relative', zIndex: 2 });
 
+/* Home is an interactive canvas — disable text selection so click-and-hold
+   to orbit never selects copy. Dialog/work pages stay fully selectable. */
+globalStyle('html[data-field="home"] body', {
+  userSelect: 'none',
+  // @ts-expect-error vendor-prefixed
+  WebkitUserSelect: 'none',
+});
+
 /* Honor reduced-motion globally */
 globalStyle('*', {
   '@media': {
