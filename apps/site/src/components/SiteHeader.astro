@@ -6,8 +6,8 @@ import Logo from './Logo.astro';
 
 <header class="hdr">
   <a href={home} class="hdr__brand" aria-label="SNDS — home">
-    <Logo size={24} class="hdr__logo" />
-    <span class="hdr__word">SNDS</span>
+    <Logo size={28} class="hdr__logo" />
+    <span class="hdr__word">SNDS DESIGN</span>
   </a>
 
   <nav class="hdr__nav" aria-label="Primary">
@@ -35,8 +35,11 @@ import Logo from './Logo.astro';
     font-size: var(--snds-fontSize-caption);
     letter-spacing: var(--snds-letterSpacing-wide);
     text-transform: uppercase;
-    /* theme-aware, with a soft shadow so it stays legible over the field */
-    text-shadow: 0 1px 16px rgba(0, 0, 0, 0.55);
+    /* glass frame: 65% bg token + blur, with a hard boundary line */
+    background: color-mix(in srgb, var(--snds-color-bg) 65%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--snds-color-border);
   }
   .hdr__brand {
     display: inline-flex;
@@ -49,7 +52,6 @@ import Logo from './Logo.astro';
   .hdr__logo {
     display: block;
     color: var(--snds-color-fg); /* currentColor → flips with theme */
-    filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.45));
   }
   .hdr__nav {
     display: flex;
@@ -61,15 +63,15 @@ import Logo from './Logo.astro';
   .hdr__toggle {
     display: grid;
     place-items: center;
-    width: 30px; height: 30px;
+    width: 32px; height: 32px;
     color: var(--snds-color-fg);
     background: transparent;
-    border: 1px solid var(--snds-color-border);
-    border-radius: var(--snds-radius-sm);
+    border: none; /* ghost */
+    border-radius: var(--snds-radius-full);
     cursor: pointer;
-    transition: border-color 120ms;
+    transition: background 120ms;
   }
-  .hdr__toggle:hover { border-color: var(--snds-color-borderStrong); }
+  .hdr__toggle:hover { background: color-mix(in srgb, var(--snds-color-fg) 12%, transparent); }
   .hdr__toggle .ico { display: none; }
   /* show the icon of the mode you'll switch TO (selector includes .hdr__toggle
      so it outranks the hide rule above) */

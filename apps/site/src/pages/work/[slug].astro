@@ -131,15 +131,18 @@ const meta = [
   .cs__close {
     display: grid;
     place-items: center;
-    width: 36px; height: 36px;
+    width: 38px; height: 38px;
     color: var(--snds-color-fg);
     background: transparent;
-    border: 1px solid var(--snds-color-border);
+    border: none; /* ghost */
     border-radius: var(--snds-radius-full);
     cursor: pointer;
-    transition: color 120ms, border-color 120ms;
+    transition: background 120ms, color 120ms;
   }
-  .cs__close:hover { color: var(--accent); border-color: var(--accent); }
+  .cs__close:hover {
+    background: color-mix(in srgb, var(--snds-color-fg) 12%, transparent);
+    color: var(--accent);
+  }
 
   .cs__head {
     margin: var(--snds-space-8) 0 var(--snds-space-10);
