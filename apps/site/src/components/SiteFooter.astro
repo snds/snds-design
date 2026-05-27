@@ -28,7 +28,9 @@ const year = new Date().getFullYear();
   .ftr {
     position: relative;
     z-index: 2;
-    background: var(--snds-color-bg);
+    background: rgba(7, 9, 12, 0.9); /* same near-black glass as the dialog */
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
     border-top: 1px solid var(--snds-color-borderSubtle);
   }
   .ftr__in {

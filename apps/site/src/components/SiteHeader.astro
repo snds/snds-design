@@ -71,9 +71,10 @@ import Logo from './Logo.astro';
   }
   .hdr__toggle:hover { border-color: var(--snds-color-borderStrong); }
   .hdr__toggle .ico { display: none; }
-  /* show the icon of the mode you'll switch TO */
-  :global(html[data-theme='dark']) .ico--sun { display: grid; }
-  :global(html[data-theme='light']) .ico--moon { display: grid; }
+  /* show the icon of the mode you'll switch TO (selector includes .hdr__toggle
+     so it outranks the hide rule above) */
+  :global(html[data-theme='dark']) .hdr__toggle .ico--sun { display: grid; }
+  :global(html[data-theme='light']) .hdr__toggle .ico--moon { display: grid; }
 
   @media (max-width: 560px) {
     .hdr__nav { gap: var(--snds-space-3); }
