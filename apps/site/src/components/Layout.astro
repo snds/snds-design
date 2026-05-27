@@ -15,7 +15,7 @@ interface Props {
 }
 
 const {
-  title = 'SNDS — AI, LLMs & Design Systems',
+  title = 'SNDS Design — Systems for intelligence.',
   description = 'Sean Sands — design systems, AI/LLM product work, and interactive engineering.',
   footer = true,
   fieldMode = 'home',
@@ -29,6 +29,8 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.ico`} sizes="32x32" />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.bunny.net" />
     <ClientRouter />
     <script is:inline>

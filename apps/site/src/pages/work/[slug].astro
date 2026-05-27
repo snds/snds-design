@@ -31,14 +31,10 @@ const meta = [
 
 <Layout title={`${d.title} — SNDS`} description={d.summary} fieldMode="dialog" footer={false}>
   <main id="main-content" class="cs" style={`--accent:${accent}`}>
-    <div class="cs__bar">
-      <a href={url('/work')} class="cs__back">All work</a>
-      <button class="cs__close" type="button" aria-label="Close and return">
+    <header class="cs__head">
+      <button class="cs__close" type="button" aria-label="Close project">
         <X size={18} weight="regular" />
       </button>
-    </div>
-
-    <header class="cs__head">
       <p class="cs__num">{cs?.num ?? '—'} / 05 · {d.client}</p>
       <h1 class="cs__title">{d.title}</h1>
       <p class="cs__summary">{d.summary}</p>
@@ -114,21 +110,11 @@ const meta = [
     border-radius: var(--snds-radius-lg);
     padding: var(--snds-space-8) clamp(var(--snds-space-6), 5vw, var(--snds-space-12)) var(--snds-space-12);
   }
-  .cs__bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--snds-space-6);
-  }
-  .cs__back {
-    font-family: var(--snds-font-mono);
-    font-size: var(--snds-fontSize-caption);
-    letter-spacing: var(--snds-letterSpacing-wide);
-    text-transform: uppercase;
-    color: var(--snds-color-fgMuted);
-  }
-  .cs__back:hover { color: var(--snds-color-fg); }
+  /* close — anchored top-right of the hero header */
   .cs__close {
+    position: absolute;
+    top: var(--snds-space-5);
+    right: 0;
     display: grid;
     place-items: center;
     width: 38px; height: 38px;
@@ -145,9 +131,11 @@ const meta = [
   }
 
   .cs__head {
-    margin: var(--snds-space-8) 0 var(--snds-space-10);
+    position: relative;
+    margin: 0 0 var(--snds-space-10);
     border-top: 2px solid var(--accent);
-    padding-top: var(--snds-space-6);
+    /* right gutter reserves space for the absolutely-placed close button */
+    padding: var(--snds-space-6) var(--snds-space-12) 0 0;
   }
   .cs__num {
     font-family: var(--snds-font-mono);
@@ -164,8 +152,11 @@ const meta = [
     font-size: clamp(3.25rem, 8.5vw, 6.75rem);
     line-height: 0.95;
     letter-spacing: 0;
-    font-weight: 600;
+    overflow-wrap: break-word;
     margin: var(--snds-space-3) 0 var(--snds-space-4);
+  }
+  @media (max-width: 560px) {
+    .cs__title { font-size: 3.9rem; }
   }
   .cs__summary {
     font-size: var(--snds-fontSize-lead);

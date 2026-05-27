@@ -78,7 +78,9 @@ import { url } from '../lib/paths';
   .rail__item[aria-current='true'] .rail__lab { opacity: 1; transform: translateX(0); color: var(--snds-color-fg); }
   @media (max-width: 720px) { .rail { display: none; } }
 
-  .scroll { position: relative; z-index: 2; }
+  /* clip the readability-oval ::before bleed (inset -80px) so it can't extend
+     the document width and open a horizontal-scroll gap on mobile */
+  .scroll { position: relative; z-index: 2; overflow-x: clip; }
   .panel {
     min-height: 100vh; max-width: var(--snds-grid-maxWidth);
     margin-inline: auto; padding-inline: var(--snds-grid-margin);
@@ -94,8 +96,13 @@ import { url } from '../lib/paths';
   }
   .kicker .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--snds-color-signal); box-shadow: 0 0 12px var(--snds-color-signal); }
   /* Tungsten display — hero is the largest cap on the site, packed tight. */
-  .title { font-family: var(--snds-font-heading); text-transform: uppercase; font-size: clamp(4.25rem, 13vw, 11.5rem); line-height: 0.9; letter-spacing: 0; font-weight: 600; text-wrap: balance; }
+  .title { font-family: var(--snds-font-heading); text-transform: uppercase; font-size: clamp(4.25rem, 13vw, 11.5rem); line-height: 0.9; letter-spacing: 0; font-weight: 600; text-wrap: balance; overflow-wrap: break-word; }
   .title em { font-style: italic; color: var(--snds-color-fgMuted); }
+  /* mobile: headings read small on phones — bump the floor sizes */
+  @media (max-width: 560px) {
+    .title { font-size: 4.9rem; }
+    .casetitle { font-size: 3.6rem; }
+  }
   .lede { max-width: 46ch; margin-top: var(--snds-space-6); color: var(--snds-color-fgMuted); font-size: var(--snds-fontSize-lead); line-height: var(--snds-lineHeight-snug); }
 
   /* readability oval — blurs + darkens the field behind body copy.

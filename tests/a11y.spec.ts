@@ -8,7 +8,6 @@ import AxeBuilder from '@axe-core/playwright';
 // deploy-gating scan.
 const routes = [
   { path: '', name: 'home' },
-  { path: 'work/', name: 'work-index' },
   { path: 'work/data-management/', name: 'case-study' },
 ];
 

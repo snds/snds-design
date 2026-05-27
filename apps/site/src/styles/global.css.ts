@@ -134,7 +134,10 @@ globalStyle('.skip-link', {
 globalStyle('.skip-link:focus-visible', { transform: 'translateY(0)' });
 
 /* ---- persistent field layers (in Layout, survive view transitions) ---- */
-globalStyle('.field', { position: 'fixed', inset: 0, zIndex: 0 });
+// overflow:hidden clips the 3D-projected <Html> field labels that can land
+// past the viewport edge — without it they extend the document width and leave
+// a horizontal-scroll gap (e.g. beside the footer on mobile).
+globalStyle('.field', { position: 'fixed', inset: 0, zIndex: 0, overflow: 'hidden' });
 
 /* mute overlay — transparent on home, dark + blurred on detail/work pages.
    Animates on data-field change for the page transition. */
