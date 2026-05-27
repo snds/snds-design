@@ -1,0 +1,19 @@
+{
+  "name": "snds-portfolio",
+  "private": true,
+  "version": "0.0.0",
+  "description": "SNDS portfolio — AI, LLMs, and design systems. Astro + R3F + Radix + vanilla-extract.",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @snds/site",
+    "build": "npm run build -w @snds/site",
+    "preview": "npm run preview -w @snds/site"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

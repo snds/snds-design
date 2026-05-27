@@ -1,0 +1,82 @@
+name: Deploy
+
+# Builds the static site and deploys it. Default target is GitHub Pages
+# (works today). The build output (apps/site/dist) is a portable static
+# bundle, so swapping to Infomaniak/Bunny later only changes the deploy step
+# (see the commented Infomaniak job at the bottom) — not the build.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Inject the licensed Berkeley Mono woff2 from encrypted secrets so the
+      # live site renders correctly — without the font living in the repo.
+      - name: Restore licensed font
+        run: |
+          mkdir -p apps/site/public/fonts/berkeley-mono
+          printf '%s' "$BM_REGULAR" | base64 -d > apps/site/public/fonts/berkeley-mono/BerkeleyMonoVariable-Regular.woff2
+          printf '%s' "$BM_ITALIC" | base64 -d > apps/site/public/fonts/berkeley-mono/BerkeleyMonoVariable-Italic.woff2
+        env:
+          BM_REGULAR: ${{ secrets.BM_REGULAR_WOFF2 }}
+          BM_ITALIC: ${{ secrets.BM_ITALIC_WOFF2 }}
+      - run: npm run build
+      # NOTE: deploying to a project subpath (user.github.io/repo) requires
+      # `base: '/repo/'` in astro.config.mjs. For a custom domain at the root
+      # (snds.design) keep base '/' and add a CNAME file in apps/site/public/.
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+# ---------------------------------------------------------------------------
+# Alternative: deploy the same apps/site/dist to Infomaniak (or any
+# SSH/SFTP host). Replace the `deploy` job above with:
+#
+#   deploy:
+#     needs: build
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-node@v4
+#         with: { node-version: 22, cache: npm }
+#       - run: npm ci && npm run build
+#       - name: Upload via lftp (SFTP)
+#         run: |
+#           sudo apt-get update && sudo apt-get install -y lftp
+#           lftp -c "set sftp:auto-confirm yes; \
+#             open -u $FTP_USER,$FTP_PASS sftp://$FTP_HOST; \
+#             mirror -R --delete apps/site/dist /sites/snds.design"
+#         env:
+#           FTP_HOST: ${{ secrets.INFOMANIAK_HOST }}
+#           FTP_USER: ${{ secrets.INFOMANIAK_USER }}
+#           FTP_PASS: ${{ secrets.INFOMANIAK_PASS }}
+# ---------------------------------------------------------------------------

@@ -1,0 +1,51 @@
+---
+title: Nexus Threat Explorer
+summary: A threat-network tracing tool built fast on an open design system to visualize the structure of an attack.
+client: Proofpoint
+role: Senior UX Designer
+year: 2017–2019
+team: 1 designer · 2–3 engineers
+tools: ['Sketch', 'Adobe Illustrator', 'InVision']
+tags: ['Design Systems', 'UX Research', 'Interaction Design', 'Data Visualization', 'Prototyping']
+metrics:
+  - { label: 'Threats missed', value: '−42%' }
+  - { label: 'Time to remediate', value: '~40m → ~5m' }
+  - { label: 'To first alpha', value: '~3 months' }
+---
+
+Proofpoint wanted to broaden its suite with a comprehensive, elegant tool that
+visualized the structure of an attack across a customer's infrastructure. Nexus
+Threat Explorer (NTX) was designed to work alongside Targeted Attack Protection
+(TAP) — and it had to ship fast.
+
+## The problem
+
+Visualizing threat propagation across a network is hard, and there were few
+public examples to learn from. Attacks involve dense, branching relationships
+that demanded real ideation to make legible. Meanwhile the foundational product,
+TAP, had no scalable, reusable component layer to build on — and we had three to
+six months to stand up a working prototype under startup-like constraints.
+
+> **The challenge:** create a new product out of whole cloth, with no established
+> set of components or patterns to draw from.
+
+## Approach — find the source
+
+Engineering audited the TAP codebase and found accessibility and scalability
+issues that ruled out reuse. Rather than build a system from zero on an
+impossible timeline, we evaluated several — IBM Carbon, the U.S. Web Design
+System — and chose **Material Design 2.0**: accessible, usable out of the box,
+and capable of being both data-rich and approachable.
+
+Early designs paired fixed node diagrams with generalized insights. Customer
+interviews pushed us to think bigger — _"go big or go home."_ A granted extra
+week of ideation produced a high-fidelity prototype that landed hard with
+customers, who started asking _when_ they could have it. Over the following year
+we layered in Related IOCs, Compromised Users, and a Saved Graph Dashboard,
+validating each with beta participants.
+
+## Outcome
+
+We ideated and shipped a product customers were vocal about wanting — to first
+alpha in roughly three months. Beyond NTX, the Material implementation became a
+proof point that nudged other business units to explore the same path.

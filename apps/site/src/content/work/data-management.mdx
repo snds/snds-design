@@ -1,0 +1,46 @@
+---
+title: Data Management
+summary: A simplified dashboard and flow for importing, templating, and managing data — without losing progress or work.
+client: Zuora
+role: Principal UX/UI Designer
+year: '2021'
+team: 1 designer · 2 engineers
+tools: ['Figma']
+tags: ['UX Research', 'Interaction Design', 'Visual Design', 'Prototyping']
+metrics:
+  - { label: 'Errors fixed in place', value: 'No redirects' }
+  - { label: 'Progress loss', value: 'Eliminated' }
+---
+
+Zuora's data-import experience hadn't been touched in years, and it showed. A
+brittle, multi-page flow lost user progress on failure, discarded uploaded data
+on errors, and offered none of the templating customers kept asking for. The
+brief was deceptively simple: let people import, fix, and template their data
+without ever losing their work.
+
+## The problem
+
+The legacy flow failed in the ways that hurt most. A multi-step path meant any
+error sent users back to the start. Progress wasn't saved, so a stumble near the
+end cost everything. And there was no way to apply reusable templates to imported
+data — a top customer request the old architecture simply couldn't accommodate.
+
+> **The challenge:** deliver a simplified experience where the user can't lose
+> progress or data, and can apply templates to what they import.
+
+## Approach
+
+I reframed the flow around stability and recovery rather than linear steps. A
+cleaner dashboard surfaced every import with a clear status and the actions
+available to it. A stepped, guided process walked users through data issues in
+context. Working with engineering, we hardened page stability and moved to a
+dialog-based flow with dismissal warnings and toast confirmations — so the system
+always told you where you stood. Critically, errors were corrected **inline**
+instead of bouncing the user somewhere else to start over.
+
+## Outcome
+
+Users could fix import errors within the same interface, receive progressive save
+confirmations, and keep their work — uploaded data and all — through any stumble.
+The redesign turned a fragile, abandonment-prone task into a recoverable,
+legible one.

@@ -1,0 +1,87 @@
+---
+import { Sun, Moon } from '@phosphor-icons/react';
+import { url, home } from '../lib/paths';
+---
+
+<header class="hdr">
+  <a href={home} class="hdr__brand" aria-label="SNDS — home">
+    <span class="hdr__mark" aria-hidden="true"></span>
+    SNDS
+  </a>
+
+  <nav class="hdr__nav" aria-label="Primary">
+    <a href={url('/work')}>Work</a>
+    <a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="mailto:hello@snds.design">Contact</a>
+    <button id="theme-toggle" class="hdr__toggle" type="button" aria-label="Toggle color theme">
+      <span class="ico ico--dark"><Moon size={16} weight="bold" /></span>
+      <span class="ico ico--light"><Sun size={16} weight="bold" /></span>
+    </button>
+  </nav>
+</header>
+
+<style>
+  .hdr {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--snds-space-6);
+    padding: var(--snds-space-4) var(--snds-grid-margin);
+    font-family: var(--snds-font-mono);
+    font-size: var(--snds-fontSize-caption);
+    letter-spacing: var(--snds-letterSpacing-wide);
+    text-transform: uppercase;
+    mix-blend-mode: difference; /* stays legible over the colored field */
+  }
+  .hdr__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--snds-space-2);
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.05em;
+  }
+  .hdr__mark {
+    width: 10px; height: 10px;
+    background: #fff;
+    display: inline-block;
+  }
+  .hdr__nav {
+    display: flex;
+    align-items: center;
+    gap: var(--snds-space-5);
+  }
+  .hdr__nav a { color: #fff; opacity: 0.8; transition: opacity 120ms; }
+  .hdr__nav a:hover { opacity: 1; }
+  .hdr__toggle {
+    display: grid;
+    place-items: center;
+    width: 30px; height: 30px;
+    color: #fff;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: var(--snds-radius-sm);
+    cursor: pointer;
+  }
+  .hdr__toggle .ico { display: none; }
+  :global(html[data-theme='dark']) .ico--dark { display: grid; }
+  :global(html[data-theme='light']) .ico--light { display: grid; }
+
+  @media (max-width: 560px) {
+    .hdr__nav { gap: var(--snds-space-3); }
+    .hdr__nav a:nth-child(2) { display: none; }
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+  btn?.addEventListener('click', () => {
+    const html = document.documentElement;
+    const next = html.dataset.theme === 'light' ? 'dark' : 'light';
+    html.dataset.theme = next;
+    try { localStorage.setItem('snds-theme', next); } catch {}
+  });
+</script>

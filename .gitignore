@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+.astro/
+.output/
+.vercel/
+
+# vanilla-extract
+*.css.ts.vanilla.css
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# licensed fonts — NEVER commit to a public repo (redistribution).
+# Injected into the live build from a CI secret; kept locally for dev.
+/berkeley-mono-variable/
+apps/site/public/fonts/berkeley-mono/*.woff2
+apps/site/public/fonts/berkeley-mono/*.woff
+apps/site/public/fonts/berkeley-mono/*.ttf
+apps/site/public/fonts/berkeley-mono/*.otf
+
+# os / editor
+.DS_Store
+*.log
+.vscode/
+.idea/

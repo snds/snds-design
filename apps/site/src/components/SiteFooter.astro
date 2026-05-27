@@ -1,0 +1,81 @@
+---
+import { url } from '../lib/paths';
+const year = new Date().getFullYear();
+---
+
+<footer class="ftr">
+  <div class="ftr__in">
+    <div class="ftr__lead">
+      <p class="ftr__kick">Let's build something</p>
+      <a class="ftr__email" href="mailto:hello@snds.design">hello@snds.design</a>
+    </div>
+
+    <nav class="ftr__links" aria-label="Footer">
+      <a href={url('/work')}>Work</a>
+      <a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:hello@snds.design">Email</a>
+    </nav>
+
+    <div class="ftr__colophon">
+      <span>47.3769°N · 122.4°W</span>
+      <span>Built with Astro · three.js · Berkeley&nbsp;Mono</span>
+      <span>© {year} SNDS</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ftr {
+    position: relative;
+    z-index: 1;
+    background: var(--snds-color-bg);
+    border-top: 1px solid var(--snds-color-borderSubtle);
+  }
+  .ftr__in {
+    max-width: var(--snds-grid-maxWidth);
+    margin-inline: auto;
+    padding: var(--snds-space-16) var(--snds-grid-margin) var(--snds-space-8);
+    display: grid;
+    gap: var(--snds-space-10);
+  }
+  .ftr__kick {
+    font-family: var(--snds-font-mono);
+    font-size: var(--snds-fontSize-caption);
+    letter-spacing: var(--snds-letterSpacing-hud);
+    text-transform: uppercase;
+    color: var(--snds-color-fgSubtle);
+    margin-bottom: var(--snds-space-3);
+  }
+  .ftr__email {
+    font-family: var(--snds-font-display);
+    font-size: clamp(2rem, 6vw, 4rem);
+    letter-spacing: -0.03em;
+    color: var(--snds-color-fg);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color 160ms;
+  }
+  .ftr__email:hover { border-color: var(--snds-color-primary); }
+  .ftr__links {
+    display: flex;
+    gap: var(--snds-space-6);
+    font-family: var(--snds-font-mono);
+    font-size: var(--snds-fontSize-caption);
+    letter-spacing: var(--snds-letterSpacing-wide);
+    text-transform: uppercase;
+  }
+  .ftr__links a { color: var(--snds-color-fgMuted); }
+  .ftr__links a:hover { color: var(--snds-color-fg); }
+  .ftr__colophon {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--snds-space-2) var(--snds-space-6);
+    font-family: var(--snds-font-mono);
+    font-size: var(--snds-fontSize-micro);
+    letter-spacing: var(--snds-letterSpacing-wide);
+    text-transform: uppercase;
+    color: var(--snds-color-fgSubtle);
+    padding-top: var(--snds-space-6);
+    border-top: 1px solid var(--snds-color-borderSubtle);
+  }
+</style>

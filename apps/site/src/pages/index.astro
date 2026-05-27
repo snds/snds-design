@@ -1,0 +1,151 @@
+---
+import Layout from '../components/Layout.astro';
+import HeroCanvas from '../r3f/HeroCanvas';
+import { CASE_STUDIES } from '../data/caseStudies';
+import { url } from '../lib/paths';
+---
+
+<Layout>
+  <!-- fixed field behind everything; scroll drives the camera + node color -->
+  <div class="field" aria-hidden="true"><HeroCanvas client:only="react" /></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- section indicator -->
+  <nav class="rail" aria-label="Sections">
+    <button class="rail__item" data-target="0" style="--accent:#22d3e0"><span class="rail__tick"></span><span class="rail__lab">Intro</span></button>
+    {CASE_STUDIES.map((cs, i) => (
+      <button class="rail__item" data-target={i + 1} style={`--accent:${cs.color}`}>
+        <span class="rail__tick" />
+        <span class="rail__lab">{cs.num} {cs.title}</span>
+      </button>
+    ))}
+  </nav>
+
+  <main id="main-content" class="scroll">
+    <section class="panel">
+      <div class="panel__in">
+        <p class="kicker"><span class="dot"></span>Structure from chaos</p>
+        <h1 class="title">Systems for<br /><em>intelligence.</em></h1>
+        <p class="lede">
+          I build the connective tissue between AI capability and human intent —
+          design systems, LLM product surfaces, and the interactive demos that prove them out.
+        </p>
+        <p class="hud scrollcue">Scroll to explore the work ↓</p>
+      </div>
+    </section>
+
+    {
+      CASE_STUDIES.map((cs) => (
+        <section class="panel" id={cs.slug}>
+          <div class="panel__in">
+            <p class="casenum" style={`color:${cs.color}`}>{cs.num} / 05 · {cs.colorName}</p>
+            <h2 class="casetitle">{cs.title}</h2>
+            <p class="caseblurb">{cs.blurb}</p>
+            <div class="caserow">
+              <span class="swatch" style={`background:${cs.color}`} />
+              <a class="caselink" href={url(`/work/${cs.slug}`)}>Open case study →</a>
+              <span class="hud demo">live demo · soon</span>
+            </div>
+          </div>
+        </section>
+      ))
+    }
+  </main>
+</Layout>
+
+<style>
+  .field { position: fixed; inset: 0; z-index: 0; }
+  .grain {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none;
+    opacity: 0.05; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* section rail */
+  .rail {
+    position: fixed;
+    right: var(--snds-grid-margin);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: var(--snds-space-3);
+    align-items: flex-end;
+  }
+  .rail__item {
+    display: flex; align-items: center; gap: var(--snds-space-3);
+    background: none; border: none; cursor: pointer; padding: 2px 0;
+  }
+  .rail__tick { width: 24px; height: 1px; background: var(--snds-color-border); transition: width 200ms, background 200ms; }
+  .rail__lab {
+    font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-micro);
+    letter-spacing: var(--snds-letterSpacing-wide); text-transform: uppercase;
+    color: var(--snds-color-fgSubtle);
+    opacity: 0; transform: translateX(6px); transition: opacity 180ms, transform 180ms, color 180ms;
+  }
+  .rail__item:hover .rail__lab { opacity: 1; transform: translateX(0); }
+  .rail__item[aria-current='true'] .rail__tick { width: 40px; background: var(--accent); }
+  .rail__item[aria-current='true'] .rail__lab { opacity: 1; transform: translateX(0); color: var(--snds-color-fg); }
+  @media (max-width: 720px) { .rail { display: none; } }
+
+  .scroll { position: relative; z-index: 1; }
+  .panel {
+    min-height: 100vh; max-width: var(--snds-grid-maxWidth);
+    margin-inline: auto; padding-inline: var(--snds-grid-margin);
+    display: grid; align-items: center;
+  }
+  .panel__in { max-width: 48ch; }
+
+  .kicker {
+    display: inline-flex; align-items: center; gap: var(--snds-space-2);
+    font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-caption);
+    letter-spacing: var(--snds-letterSpacing-wide); text-transform: uppercase;
+    color: var(--snds-color-primaryFg); margin-bottom: var(--snds-space-5);
+  }
+  .kicker .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--snds-color-signal); box-shadow: 0 0 12px var(--snds-color-signal); }
+  .title { font-size: clamp(3.5rem, 11vw, 9.5rem); line-height: 0.92; letter-spacing: -0.045em; font-weight: 700; text-wrap: balance; }
+  .title em { font-style: italic; color: var(--snds-color-fgMuted); }
+  .lede { max-width: 46ch; margin-top: var(--snds-space-6); color: var(--snds-color-fgMuted); font-size: var(--snds-fontSize-lead); line-height: var(--snds-lineHeight-snug); }
+  .hud { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-micro); letter-spacing: var(--snds-letterSpacing-hud); text-transform: uppercase; color: var(--snds-color-fgSubtle); }
+  .scrollcue { margin-top: var(--snds-space-8); }
+
+  .casenum { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-caption); letter-spacing: var(--snds-letterSpacing-hud); text-transform: uppercase; }
+  .casetitle { font-size: clamp(2.5rem, 6vw, 4.75rem); line-height: 1.0; letter-spacing: -0.03em; margin: var(--snds-space-2) 0 var(--snds-space-4); }
+  .caseblurb { color: var(--snds-color-fgMuted); font-size: var(--snds-fontSize-lead); line-height: var(--snds-lineHeight-snug); max-width: 44ch; }
+  .caserow { display: flex; align-items: center; gap: var(--snds-space-5); margin-top: var(--snds-space-6); flex-wrap: wrap; }
+  .swatch { width: 14px; height: 14px; border-radius: 2px; }
+  .caselink { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-caption); letter-spacing: var(--snds-letterSpacing-wide); text-transform: uppercase; color: var(--snds-color-fg); border-bottom: 1px solid var(--snds-color-border); padding-bottom: 2px; }
+  .caselink:hover { color: var(--snds-color-primaryFg); border-color: var(--snds-color-primaryBorder); }
+  .demo { color: var(--snds-color-fgSubtle); }
+
+  @media (max-width: 720px) { .lede, .caseblurb { font-size: var(--snds-fontSize-body); } }
+</style>
+
+<script>
+  const items = Array.from(document.querySelectorAll<HTMLButtonElement>('.rail__item'));
+  const getLenis = () => (window as unknown as { __lenis?: { scrollTo: (y: number) => void } }).__lenis;
+
+  items.forEach((el) => {
+    el.addEventListener('click', () => {
+      const i = Number(el.dataset.target || 0);
+      const y = i * window.innerHeight;
+      const lenis = getLenis();
+      if (lenis) lenis.scrollTo(y);
+      else window.scrollTo(0, y);
+    });
+  });
+
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const idx = Math.round(window.scrollY / Math.max(window.innerHeight, 1));
+    items.forEach((el) => {
+      el.setAttribute('aria-current', Number(el.dataset.target) === idx ? 'true' : 'false');
+    });
+  };
+  window.addEventListener('scroll', () => {
+    if (!ticking) { requestAnimationFrame(update); ticking = true; }
+  }, { passive: true });
+  update();
+</script>

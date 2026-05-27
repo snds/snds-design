@@ -1,0 +1,343 @@
+---
+import Layout from '../components/Layout.astro';
+
+// ---- Type pairings to evaluate -------------------------------------------
+// stacks reference fonts loaded in <head> (Bunny Fonts + Fontshare).
+const pairings = [
+  {
+    id: 'plex',
+    name: 'IBM Plex Sans + IBM Plex Mono',
+    note: 'Free · OFL. Your candidate. Corporate-technical, pairs natively with Carbon icons. Humanist warmth, very legible.',
+    display: '"IBM Plex Sans", sans-serif',
+    sans: '"IBM Plex Sans", sans-serif',
+    mono: '"IBM Plex Mono", monospace',
+    displayWeight: 600,
+  },
+  {
+    id: 'geist',
+    name: 'Geist + Geist Mono',
+    note: 'Free · OFL (Vercel). Modern developer-tooling aesthetic. Neutral, precise, slightly mechanical mono. The cleanest Inter-alternative.',
+    display: '"Geist", sans-serif',
+    sans: '"Geist", sans-serif',
+    mono: '"Geist Mono", monospace',
+    displayWeight: 600,
+  },
+  {
+    id: 'space',
+    name: 'Space Grotesk + Space Mono',
+    note: 'Free · OFL. Distinctive, techy, retro-future. Space Grotesk has real display character; Space Mono is unmistakably HUD.',
+    display: '"Space Grotesk", sans-serif',
+    sans: '"Space Grotesk", sans-serif',
+    mono: '"Space Mono", monospace',
+    displayWeight: 700,
+  },
+  {
+    id: 'clash',
+    name: 'Clash Display + Switzer + JetBrains Mono',
+    note: 'Free · Fontshare/OFL. Editorial impact display (Clash) over a neutral workhorse (Switzer), HUD in JetBrains Mono. Strong "presence".',
+    display: '"Clash Display", sans-serif',
+    sans: '"Switzer", sans-serif',
+    mono: '"JetBrains Mono", monospace',
+    displayWeight: 600,
+  },
+  {
+    id: 'general',
+    name: 'General Sans + JetBrains Mono',
+    note: 'Free · Fontshare/OFL. Quietly excellent geometric-humanist sans. Restrained, premium-feeling — lets the grid + motion carry impact.',
+    display: '"General Sans", sans-serif',
+    sans: '"General Sans", sans-serif',
+    mono: '"JetBrains Mono", monospace',
+    displayWeight: 600,
+  },
+  {
+    id: 'cabinet',
+    name: 'Cabinet Grotesk + Switzer + Space Mono',
+    note: 'Free · Fontshare/OFL. Cabinet Grotesk display reads tight + architectural. Editorial-technical; good for big numerals + section markers.',
+    display: '"Cabinet Grotesk", sans-serif',
+    sans: '"Switzer", sans-serif',
+    mono: '"Space Mono", monospace',
+    displayWeight: 800,
+  },
+];
+
+// Paid options (described; sample approximated with the closest loaded font).
+const paidType = [
+  {
+    name: 'Suisse Int’l + Suisse Int’l Mono — Swiss Typefaces',
+    price: '≈ $150+/style',
+    note: 'The definitive Swiss-design / gmunk grotesque. Cold, neutral, authoritative. Approximated below with Switzer + Space Mono.',
+    sans: '"Switzer", sans-serif',
+    mono: '"Space Mono", monospace',
+  },
+  {
+    name: 'ABC Diatype + Diatype Mono — Dinamo',
+    price: '≈ $90+/style',
+    note: 'The current studio-favorite technical grotesque. Mono-adjacent, mechanical, very "interface". Approx with General Sans + Geist Mono.',
+    sans: '"General Sans", sans-serif',
+    mono: '"Geist Mono", monospace',
+  },
+  {
+    name: 'Berkeley Mono — U.S. Graphics Co.',
+    price: '≈ $75 personal',
+    note: 'A near-perfect HUD/everything-mono face. Terminal heritage, gorgeous on dark. Consider mono-led type system. Approx with JetBrains Mono.',
+    sans: '"JetBrains Mono", monospace',
+    mono: '"JetBrains Mono", monospace',
+  },
+  {
+    name: 'PP Neue Machina — Pangram Pangram',
+    price: '≈ $50+/style',
+    note: 'Mechanical, engineered, unmistakably gmunk for display. Pair with a neutral text face. Approximated below with Clash Display.',
+    sans: '"Clash Display", sans-serif',
+    mono: '"Space Mono", monospace',
+  },
+];
+
+// ---- Icon sets to compare ------------------------------------------------
+// Rendered via Iconify web component (CDN). Concept order is identical
+// across sets so you can compare the SAME 12 glyphs side by side.
+const concepts = ['cube', 'chart', 'terminal', 'ai', 'database', 'bolt', 'arrow', 'search', 'settings', 'warning', 'check', 'close'];
+const iconSets = [
+  {
+    name: 'IBM Carbon', prefix: 'carbon', note: 'Free · Apache-2. Pairs with Plex. Precise 2px grid, technical, enterprise.',
+    icons: ['carbon:cube', 'carbon:chart-line', 'carbon:terminal', 'carbon:machine-learning-model', 'carbon:data-base', 'carbon:flash', 'carbon:arrow-right', 'carbon:search', 'carbon:settings', 'carbon:warning', 'carbon:checkmark', 'carbon:close'],
+  },
+  {
+    name: 'Phosphor', prefix: 'ph', note: 'Free · MIT. 6 weights (thin→fill). Geometric, flexible, excellent for a system. Strong pick.',
+    icons: ['ph:cube', 'ph:chart-line-up', 'ph:terminal-window', 'ph:brain', 'ph:database', 'ph:lightning', 'ph:arrow-right', 'ph:magnifying-glass', 'ph:gear-six', 'ph:warning', 'ph:check', 'ph:x'],
+  },
+  {
+    name: 'Radix Icons', prefix: 'radix-icons', note: 'Free · MIT. 15×15 crisp. Pairs natively with Radix primitives. Tight UI controls; smaller set.',
+    icons: ['radix-icons:cube', 'radix-icons:bar-chart', 'radix-icons:code', 'radix-icons:rocket', 'radix-icons:archive', 'radix-icons:lightning-bolt', 'radix-icons:arrow-right', 'radix-icons:magnifying-glass', 'radix-icons:gear', 'radix-icons:exclamation-triangle', 'radix-icons:check', 'radix-icons:cross-2'],
+  },
+  {
+    name: 'Lucide', prefix: 'lucide', note: 'Free · ISC. Consistent, friendly, dev-favorite. Common — reads less bespoke.',
+    icons: ['lucide:box', 'lucide:line-chart', 'lucide:terminal', 'lucide:brain', 'lucide:database', 'lucide:zap', 'lucide:arrow-right', 'lucide:search', 'lucide:settings', 'lucide:triangle-alert', 'lucide:check', 'lucide:x'],
+  },
+  {
+    name: 'Tabler', prefix: 'tabler', note: 'Free · MIT. ~5,800 icons, uniform 2px stroke. Huge coverage for data/UI states.',
+    icons: ['tabler:cube', 'tabler:chart-line', 'tabler:terminal-2', 'tabler:brain', 'tabler:database', 'tabler:bolt', 'tabler:arrow-right', 'tabler:search', 'tabler:settings', 'tabler:alert-triangle', 'tabler:check', 'tabler:x'],
+  },
+  {
+    name: 'Iconoir', prefix: 'iconoir', note: 'Free · MIT. Thin, elegant, slightly editorial. Refined but lighter visual weight.',
+    icons: ['iconoir:box-iso', 'iconoir:graph-up', 'iconoir:terminal', 'iconoir:brain', 'iconoir:database', 'iconoir:flash', 'iconoir:arrow-right', 'iconoir:search', 'iconoir:settings', 'iconoir:warning-triangle', 'iconoir:check', 'iconoir:xmark'],
+  },
+];
+
+const paidIcons = [
+  ['Nucleo', '≈ $99–249', 'Massive (30k+), multiple styles, custom export app. Studio-grade consistency.'],
+  ['Untitled UI Icons', '≈ $79 (free subset)', '1,100+ neutral line icons designed for product UI. Clean, safe, comprehensive.'],
+  ['Streamline', '≈ $99+/yr', 'Enormous multi-style libraries. Great if you want one source for every weight/style.'],
+  ['Hugeicons Pro', '≈ $99', '4,000+ icons, 9 styles incl. duotone + “twotone”. Modern, distinctive.'],
+];
+---
+
+<Layout title="SNDS — Type & Icon Specimen">
+  <Fragment slot="head">
+    <!-- Bunny Fonts: GDPR-friendly, no-logging Google Fonts mirror -->
+    <link rel="preconnect" href="https://fonts.bunny.net" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.bunny.net/css?family=ibm-plex-sans:400,500,600,700|ibm-plex-mono:400,500|space-grotesk:400,500,700|space-mono:400,700|jetbrains-mono:400,500,700|geist:400,500,600|geist-mono:400,500&display=swap"
+    />
+    <!-- Fontshare: free-for-commercial display + text faces -->
+    <link
+      rel="stylesheet"
+      href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=switzer@400,500,600&f[]=general-sans@400,500,600&f[]=cabinet-grotesk@700,800,900&display=swap"
+    />
+    <!-- Iconify web component for icon comparison -->
+    <script is:inline src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+  </Fragment>
+
+  <main class="wrap">
+    <header class="head">
+      <p class="hud">SNDS · SPECIMEN · v0.0.0 · pick type + icons</p>
+      <h1 class="title">Choose the voice.</h1>
+      <p class="sub">
+        Six free pairings, then paid options, then six icon sets — all in the live dark palette
+        (monochrome + <span class="cy">cyan primary</span> + <span class="rd">red signal</span>).
+        Tell me the pairing # and icon set you want and I’ll lock the tokens + self-host the winners.
+      </p>
+      <div class="legend">
+        <button id="themeBtn" class="tbtn" type="button">◑ toggle theme</button>
+        <span class="hud dim">data accents →
+          <span class="sw amber"></span><span class="sw grass"></span><span class="sw violet"></span><span class="sw blue"></span>
+        </span>
+      </div>
+    </header>
+
+    <section>
+      <p class="kicker">01 — Free type pairings</p>
+      <div class="grid">
+        {pairings.map((p, i) => (
+          <article class="card">
+            <div class="cardhead">
+              <span class="idx">{String(i + 1).padStart(2, '0')}</span>
+              <h2 class="cardname">{p.name}</h2>
+            </div>
+            <p class="note">{p.note}</p>
+            <p class="hud dim" style={`font-family:${p.mono}`}>LLM://inference · 142 tok/s · ctx 200k · ◇ READY</p>
+            <h3 class="spec-display" style={`font-family:${p.display};font-weight:${p.displayWeight}`}>Systems for intelligence</h3>
+            <p class="spec-body" style={`font-family:${p.sans}`}>
+              I design and build the connective tissue between AI capability and human intent —
+              design systems, LLM product surfaces, and the interactive demos that prove them out.
+            </p>
+            <div class="meta" style={`font-family:${p.mono}`}>
+              <span>0123456789</span><span>·</span><span>2018 → 2026</span><span>·</span><span>{'{ }'} [ ] / \\ &lt; &gt; #</span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section>
+      <p class="kicker">02 — Paid options <span class="dim">(sample approximated with closest free face)</span></p>
+      <div class="grid">
+        {paidType.map((p) => (
+          <article class="card paid">
+            <div class="cardhead">
+              <span class="price">{p.price}</span>
+              <h2 class="cardname">{p.name}</h2>
+            </div>
+            <p class="note">{p.note}</p>
+            <h3 class="spec-display" style={`font-family:${p.sans};font-weight:600`}>Intelligence, engineered</h3>
+            <p class="hud dim" style={`font-family:${p.mono}`}>$ snds deploy --target infomaniak.ch ✓</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section>
+      <p class="kicker">03 — Icon sets <span class="dim">(same 12 glyphs, compared)</span></p>
+      <div class="iconlegend hud dim">
+        {concepts.map((c) => <span class="iconcol">{c}</span>)}
+      </div>
+      <div class="iconsets">
+        {iconSets.map((s) => (
+          <article class="iconrow">
+            <div class="iconmeta">
+              <h2 class="cardname">{s.name}</h2>
+              <p class="note">{s.note}</p>
+            </div>
+            <div class="iconstrip">
+              {s.icons.map((ic) => (
+                <span class="iconcell"><iconify-icon icon={ic} width="24" height="24"></iconify-icon></span>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <p class="kicker" style="margin-top:var(--snds-space-10)">04 — Paid icon libraries</p>
+      <ul class="paidlist">
+        {paidIcons.map(([name, price, note]) => (
+          <li><strong>{name}</strong> <span class="price">{price}</span><br /><span class="note">{note}</span></li>
+        ))}
+      </ul>
+    </section>
+
+    <footer class="foot hud dim">
+      end of specimen · fonts via bunny.net + fontshare · icons via iconify · production will self-host the chosen set
+    </footer>
+  </main>
+
+  <style>
+    .wrap {
+      max-width: var(--snds-grid-maxWidth);
+      margin-inline: auto;
+      padding: var(--snds-space-12) var(--snds-grid-margin) var(--snds-space-24);
+    }
+    .head { max-width: 70ch; margin-bottom: var(--snds-space-16); }
+    .hud {
+      font-family: var(--snds-font-mono);
+      font-size: var(--snds-fontSize-micro);
+      letter-spacing: var(--snds-letterSpacing-hud);
+      text-transform: uppercase;
+      color: var(--snds-color-fgSubtle);
+    }
+    .dim { color: var(--snds-color-fgSubtle); }
+    .cy { color: var(--snds-color-primaryFg); }
+    .rd { color: var(--snds-color-signalFg); }
+    .title {
+      font-family: var(--snds-font-display);
+      font-size: var(--snds-fontSize-display);
+      margin: var(--snds-space-2) 0 var(--snds-space-4);
+    }
+    .sub { color: var(--snds-color-fgMuted); font-size: var(--snds-fontSize-lead); }
+    .legend { display: flex; gap: var(--snds-space-6); align-items: center; margin-top: var(--snds-space-6); flex-wrap: wrap; }
+    .tbtn {
+      font-family: var(--snds-font-mono);
+      font-size: var(--snds-fontSize-caption);
+      letter-spacing: var(--snds-letterSpacing-wide);
+      text-transform: uppercase;
+      color: var(--snds-color-fg);
+      background: var(--snds-color-bgSurface);
+      border: 1px solid var(--snds-color-border);
+      border-radius: var(--snds-radius-sm);
+      padding: var(--snds-space-2) var(--snds-space-3);
+      cursor: pointer;
+    }
+    .tbtn:hover { border-color: var(--snds-color-borderStrong); background: var(--snds-color-bgHover); }
+    .sw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-left: 4px; vertical-align: middle; }
+    .sw.amber { background: var(--snds-data-amber-9); }
+    .sw.grass { background: var(--snds-data-grass-9); }
+    .sw.violet { background: var(--snds-data-violet-9); }
+    .sw.blue { background: var(--snds-data-blue-9); }
+
+    .kicker {
+      font-family: var(--snds-font-mono);
+      font-size: var(--snds-fontSize-caption);
+      letter-spacing: var(--snds-letterSpacing-hud);
+      text-transform: uppercase;
+      color: var(--snds-color-primaryFg);
+      border-top: 1px solid var(--snds-color-borderSubtle);
+      padding-top: var(--snds-space-3);
+      margin: var(--snds-space-16) 0 var(--snds-space-6);
+    }
+    section:first-of-type .kicker { margin-top: 0; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1px;
+      background: var(--snds-color-borderSubtle);
+      border: 1px solid var(--snds-color-borderSubtle);
+    }
+    .card { background: var(--snds-color-bg); padding: var(--snds-space-6); }
+    .card.paid { background: var(--snds-color-bgSubtle); }
+    .cardhead { display: flex; align-items: baseline; gap: var(--snds-space-3); margin-bottom: var(--snds-space-3); }
+    .idx { font-family: var(--snds-font-mono); color: var(--snds-color-signalFg); font-size: var(--snds-fontSize-caption); }
+    .price { font-family: var(--snds-font-mono); color: var(--snds-color-fgSubtle); font-size: var(--snds-fontSize-micro); letter-spacing: var(--snds-letterSpacing-wide); }
+    .cardname { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-caption); font-weight: 500; letter-spacing: var(--snds-letterSpacing-wide); color: var(--snds-color-fg); }
+    .note { color: var(--snds-color-fgMuted); font-size: var(--snds-fontSize-caption); line-height: var(--snds-lineHeight-snug); margin-bottom: var(--snds-space-4); }
+    .spec-display { font-size: var(--snds-fontSize-h2); line-height: 1.04; letter-spacing: -0.02em; margin: var(--snds-space-3) 0; }
+    .spec-body { color: var(--snds-color-fgMuted); font-size: var(--snds-fontSize-body); line-height: var(--snds-lineHeight-normal); }
+    .meta { display: flex; gap: var(--snds-space-3); flex-wrap: wrap; margin-top: var(--snds-space-4); font-size: var(--snds-fontSize-caption); color: var(--snds-color-fgSubtle); }
+
+    .iconlegend { display: none; }
+    .iconsets { border: 1px solid var(--snds-color-borderSubtle); }
+    .iconrow { display: grid; grid-template-columns: 240px 1fr; gap: var(--snds-space-4); padding: var(--snds-space-5) var(--snds-space-6); border-bottom: 1px solid var(--snds-color-borderSubtle); align-items: center; }
+    .iconrow:last-child { border-bottom: none; }
+    .iconmeta .cardname { display: block; margin-bottom: 4px; }
+    .iconstrip { display: flex; gap: var(--snds-space-5); flex-wrap: wrap; color: var(--snds-color-fg); }
+    .iconcell { display: grid; place-items: center; color: var(--snds-color-fg); }
+    .iconcell iconify-icon { color: var(--snds-color-fg); }
+
+    .paidlist { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: var(--snds-space-4); }
+    .paidlist li { background: var(--snds-color-bgSubtle); border: 1px solid var(--snds-color-borderSubtle); padding: var(--snds-space-4); border-radius: var(--snds-radius-sm); }
+    .paidlist strong { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-caption); letter-spacing: var(--snds-letterSpacing-wide); }
+
+    .foot { margin-top: var(--snds-space-16); padding-top: var(--snds-space-4); border-top: 1px solid var(--snds-color-borderSubtle); }
+
+    @media (max-width: 640px) {
+      .iconrow { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <script is:inline>
+    const btn = document.getElementById('themeBtn');
+    btn?.addEventListener('click', () => {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === 'light' ? 'dark' : 'light';
+    });
+  </script>
+</Layout>

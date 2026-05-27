@@ -1,0 +1,56 @@
+---
+import '../styles/global.css';
+import SiteHeader from './SiteHeader.astro';
+import SiteFooter from './SiteFooter.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Hide the footer (the landing renders its own at the end of the scroll). */
+  footer?: boolean;
+}
+
+const {
+  title = 'SNDS — AI, LLMs & Design Systems',
+  description = 'Sean Sands — design systems, AI/LLM product work, and interactive engineering.',
+  footer = true,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.bunny.net" />
+    <!-- apply stored theme before paint to avoid a flash -->
+    <script is:inline>
+      try {
+        const t = localStorage.getItem('snds-theme');
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to content</a>
+    <SiteHeader />
+    <slot />
+    {footer && <SiteFooter />}
+    <script>
+      import Lenis from 'lenis';
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce) {
+        const lenis = new Lenis({ lerp: 0.085, smoothWheel: true, wheelMultiplier: 1 });
+        const raf = (time: number) => {
+          lenis.raf(time);
+          requestAnimationFrame(raf);
+        };
+        requestAnimationFrame(raf);
+        (window as unknown as { __lenis?: unknown }).__lenis = lenis;
+      }
+    </script>
+  </body>
+</html>
