@@ -743,7 +743,7 @@ export function HeroField({ frozen = false, dialog = false, light = false }: Her
                 display: 'flex', alignItems: 'center', gap: 6, paddingLeft: 6,
                 borderLeft: '1px solid var(--snds-color-primaryBorder)',
                 fontFamily: 'var(--snds-font-mono)', fontSize: 10, letterSpacing: '0.18em',
-                textTransform: 'uppercase', whiteSpace: 'nowrap', color: 'var(--snds-color-fgSubtle)',
+                textTransform: 'uppercase', whiteSpace: 'nowrap', color: 'var(--snds-color-fgMuted)',
               }}
             >
               <span style={{ width: 5, height: 5, background: 'var(--snds-color-primary)', boxShadow: '0 0 8px var(--snds-color-primary)' }} />

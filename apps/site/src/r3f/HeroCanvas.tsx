@@ -3,14 +3,17 @@ import { Canvas } from '@react-three/fiber';
 import { HeroField } from './HeroField';
 import { Nebula } from './Nebula';
 
-function usePrefersReducedMotion() {
+// Reads the unified `data-motion` attribute (set by the boot script + the
+// settings toggle, derived from the OS preference or an explicit override), so
+// the field freezes whenever motion is reduced — by preference or by choice.
+function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduced(mq.matches);
-    const on = () => setReduced(mq.matches);
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
+    const read = () => setReduced(document.documentElement.dataset.motion === 'reduce');
+    read();
+    const obs = new MutationObserver(read);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-motion'] });
+    return () => obs.disconnect();
   }, []);
   return reduced;
 }
@@ -42,7 +45,7 @@ function useLightTheme() {
 }
 
 export default function HeroCanvas() {
-  const reduced = usePrefersReducedMotion();
+  const reduced = useReducedMotion();
   const dialog = useFieldDialog();
   const light = useLightTheme();
   return (

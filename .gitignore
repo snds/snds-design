@@ -7,6 +7,12 @@ dist/
 .output/
 .vercel/
 
+# test / a11y artifacts
+test-results/
+playwright-report/
+playwright/.cache/
+coverage/
+
 # vanilla-extract
 *.css.ts.vanilla.css
 
@@ -32,3 +38,8 @@ apps/site/public/fonts/berkeley-mono/*.otf
 *.log
 .vscode/
 .idea/
+
+# licensed Tungsten (test)
+apps/site/public/fonts/tungsten/*.otf
+apps/site/public/fonts/tungsten/*.woff2
+/assets/

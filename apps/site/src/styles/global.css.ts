@@ -51,6 +51,7 @@ globalStyle('body', {
   color: vars.color.fg,
   fontFamily: vars.font.sans,
   fontSize: vars.fontSize.body,
+  fontWeight: vars.weight.extralight,
   lineHeight: vars.lineHeight.normal,
   fontSynthesis: 'none',
   WebkitFontSmoothing: 'antialiased',
@@ -58,11 +59,15 @@ globalStyle('body', {
   textRendering: 'optimizeLegibility',
 });
 
+/* Default headings ride Berkeley Mono — neutral, regular weight. Tungsten is
+   reserved for two display moments (hero/story titles, project-dialog title)
+   and is opted into per-element, not globally. Nothing heavier than semibold. */
 globalStyle('h1, h2, h3, h4', {
   fontFamily: vars.font.display,
   fontWeight: vars.weight.regular,
   lineHeight: vars.lineHeight.tight,
   letterSpacing: vars.letterSpacing.tight,
+  textWrap: 'balance',
 });
 
 globalStyle('a', {
@@ -79,6 +84,30 @@ globalStyle(':focus-visible', {
   outline: `2px solid ${vars.color.borderFocus}`,
   outlineOffset: '2px',
 });
+
+/* Reduced motion. data-motion='reduce' (set by the toggle or the OS preference
+   via the boot script) near-zeroes transitions/animations. data-motion='full'
+   is an explicit opt back in. The @media fallback covers no-JS visitors whose
+   OS prefers reduced motion (where the attribute isn't set). */
+const REDUCE = {
+  animationDuration: '0.001ms !important',
+  animationIterationCount: '1 !important',
+  transitionDuration: '0.001ms !important',
+  scrollBehavior: 'auto !important' as 'auto',
+};
+globalStyle(
+  "html[data-motion='reduce'] *, html[data-motion='reduce'] *::before, html[data-motion='reduce'] *::after",
+  REDUCE,
+);
+globalStyle(
+  "html:not([data-motion='full']) *, html:not([data-motion='full']) *::before, html:not([data-motion='full']) *::after",
+  {
+    // honour the OS preference unless the user explicitly chose full motion
+    '@media': {
+      '(prefers-reduced-motion: reduce)': REDUCE,
+    },
+  },
+);
 
 globalStyle('img, svg, canvas', {
   display: 'block',

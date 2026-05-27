@@ -33,7 +33,7 @@ import { url } from '../lib/paths';
       CASE_STUDIES.map((cs) => (
         <section class="panel" id={cs.slug}>
           <div class="panel__in">
-            <p class="casenum" style={`color:${cs.color}`}>{cs.num} / 05 · {cs.client}</p>
+            <p class="casenum" style={`--accent:${cs.color}`}>{cs.num} / 05 · {cs.client}</p>
             <h2 class="casetitle">{cs.title}</h2>
             <p class="caseblurb">{cs.blurb}</p>
             <div class="caserow">
@@ -70,7 +70,7 @@ import { url } from '../lib/paths';
     text-align: right;
     font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-micro);
     letter-spacing: var(--snds-letterSpacing-wide); text-transform: uppercase;
-    color: var(--snds-color-fgSubtle);
+    color: var(--snds-color-fgMuted);
     opacity: 0; transform: translateX(8px); transition: opacity 180ms, transform 180ms, color 180ms;
   }
   .rail__item:hover .rail__lab { opacity: 1; transform: translateX(0); }
@@ -93,8 +93,8 @@ import { url } from '../lib/paths';
     color: var(--snds-color-primaryFg); margin-bottom: var(--snds-space-5);
   }
   .kicker .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--snds-color-signal); box-shadow: 0 0 12px var(--snds-color-signal); }
-  .title { font-size: clamp(3.5rem, 11vw, 9.5rem); line-height: 0.92; letter-spacing: -0.045em; font-weight: 500; text-wrap: balance; }
-  .casetitle { font-weight: 500; }
+  /* Tungsten display — hero is the largest cap on the site, packed tight. */
+  .title { font-family: var(--snds-font-heading); text-transform: uppercase; font-size: clamp(4.25rem, 13vw, 11.5rem); line-height: 0.9; letter-spacing: 0; font-weight: 600; text-wrap: balance; }
   .title em { font-style: italic; color: var(--snds-color-fgMuted); }
   .lede { max-width: 46ch; margin-top: var(--snds-space-6); color: var(--snds-color-fgMuted); font-size: var(--snds-fontSize-lead); line-height: var(--snds-lineHeight-snug); }
 
@@ -110,17 +110,21 @@ import { url } from '../lib/paths';
     mask-image: radial-gradient(ellipse at center, #000 35%, rgba(0,0,0,0) 72%);
     pointer-events: none;
   }
-  .hud { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-micro); letter-spacing: var(--snds-letterSpacing-hud); text-transform: uppercase; color: var(--snds-color-fgSubtle); }
+  .hud { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-micro); font-weight: var(--snds-weight-regular); letter-spacing: var(--snds-letterSpacing-hud); text-transform: uppercase; color: var(--snds-color-fgMuted); }
   .scrollcue { margin-top: var(--snds-space-8); }
 
-  .casenum { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-caption); letter-spacing: var(--snds-letterSpacing-hud); text-transform: uppercase; }
-  .casetitle { font-size: clamp(2.5rem, 6vw, 4.75rem); line-height: 1.0; letter-spacing: -0.03em; margin: var(--snds-space-2) 0 var(--snds-space-4); }
+  .casenum { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-caption); letter-spacing: var(--snds-letterSpacing-hud); text-transform: uppercase; color: var(--accent); }
+  /* Vivid accents pass AA on the dark field but not on the light surface;
+     darken toward the foreground only in light mode (keeps dark vivid). */
+  :global(html[data-theme='light']) .casenum { color: color-mix(in srgb, var(--accent) 50%, var(--snds-color-fg)); }
+  /* Tungsten display — scrolling story titles. */
+  .casetitle { font-family: var(--snds-font-heading); text-transform: uppercase; font-weight: 600; font-size: clamp(3rem, 7.5vw, 6rem); line-height: 1.0; letter-spacing: 0; margin: var(--snds-space-2) 0 var(--snds-space-4); }
   .caseblurb { color: var(--snds-color-fgMuted); font-size: var(--snds-fontSize-lead); line-height: var(--snds-lineHeight-snug); max-width: 44ch; }
   .caserow { display: flex; align-items: center; gap: var(--snds-space-5); margin-top: var(--snds-space-6); flex-wrap: wrap; }
   .swatch { width: 14px; height: 14px; border-radius: 2px; }
   .caselink { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-caption); letter-spacing: var(--snds-letterSpacing-wide); text-transform: uppercase; color: var(--snds-color-fg); border-bottom: 1px solid var(--snds-color-border); padding-bottom: 2px; }
   .caselink:hover { color: var(--snds-color-primaryFg); border-color: var(--snds-color-primaryBorder); }
-  .demo { color: var(--snds-color-fgSubtle); }
+  .demo { color: var(--snds-color-fgMuted); }
 
   @media (max-width: 720px) { .lede, .caseblurb { font-size: var(--snds-fontSize-body); } }
 </style>
@@ -156,6 +160,35 @@ import { url } from '../lib/paths';
     window.addEventListener('scroll', () => {
       if (!ticking) { requestAnimationFrame(() => { ticking = false; update(); }); ticking = true; }
     }, { passive: true });
+  }
+
+  // Keyboard section nav for the snap-scroll area. Arrows/J/K step one section;
+  // Home/End jump to the ends. Bound once; inert when the scroll area is absent.
+  const sectionCount = () => document.querySelectorAll('.scroll .panel').length;
+  const currentSection = () => Math.round(window.scrollY / Math.max(window.innerHeight, 1));
+  const goToSection = (i: number) => {
+    const idx = Math.max(0, Math.min(sectionCount() - 1, i));
+    const y = idx * window.innerHeight;
+    const reduced = document.documentElement.dataset.motion === 'reduce';
+    const lenis = getLenis();
+    if (lenis && !reduced) lenis.scrollTo(y);
+    else window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
+  };
+  if (!(window as unknown as { __homeKeys?: boolean }).__homeKeys) {
+    (window as unknown as { __homeKeys?: boolean }).__homeKeys = true;
+    document.addEventListener('keydown', (e) => {
+      if (!document.querySelector('.scroll')) return;        // not the home page
+      if (document.querySelector('dialog[open]')) return;    // help overlay owns keys
+      const t = e.target;
+      if (t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      switch (e.key) {
+        case 'ArrowDown': case 'j': case 'J': e.preventDefault(); goToSection(currentSection() + 1); break;
+        case 'ArrowUp':   case 'k': case 'K': e.preventDefault(); goToSection(currentSection() - 1); break;
+        case 'Home': e.preventDefault(); goToSection(0); break;
+        case 'End':  e.preventDefault(); goToSection(sectionCount() - 1); break;
+      }
+    });
   }
 
   initRail();

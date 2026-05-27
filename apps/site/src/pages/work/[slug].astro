@@ -156,11 +156,15 @@ const meta = [
     text-transform: uppercase;
     color: var(--accent);
   }
+  /* Tungsten display — title at the top of the project dialog. */
   .cs__title {
-    font-size: clamp(2.75rem, 7vw, 5.5rem);
-    line-height: 1.0;
-    letter-spacing: -0.035em;
-    font-weight: 500;
+    font-family: var(--snds-font-heading);
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: clamp(3.25rem, 8.5vw, 6.75rem);
+    line-height: 0.95;
+    letter-spacing: 0;
+    font-weight: 600;
     margin: var(--snds-space-3) 0 var(--snds-space-4);
   }
   .cs__summary {
@@ -179,6 +183,7 @@ const meta = [
   .cs__tags li {
     font-family: var(--snds-font-mono);
     font-size: var(--snds-fontSize-micro);
+    font-weight: var(--snds-weight-regular);
     letter-spacing: var(--snds-letterSpacing-wide);
     text-transform: uppercase;
     color: var(--snds-color-fgMuted);
@@ -198,9 +203,10 @@ const meta = [
   .cs__meta dt {
     font-family: var(--snds-font-mono);
     font-size: var(--snds-fontSize-micro);
+    font-weight: var(--snds-weight-regular);
     letter-spacing: var(--snds-letterSpacing-hud);
     text-transform: uppercase;
-    color: var(--snds-color-fgSubtle);
+    color: var(--snds-color-fgMuted);
     margin-bottom: var(--snds-space-2);
   }
   .cs__meta dd { font-size: var(--snds-fontSize-body); color: var(--snds-color-fg); }
@@ -230,9 +236,10 @@ const meta = [
   .cs__metricLabel {
     font-family: var(--snds-font-mono);
     font-size: var(--snds-fontSize-micro);
+    font-weight: var(--snds-weight-regular);
     letter-spacing: var(--snds-letterSpacing-wide);
     text-transform: uppercase;
-    color: var(--snds-color-fgSubtle);
+    color: var(--snds-color-fgMuted);
   }
 
   /* MDX prose */
@@ -301,27 +308,83 @@ const meta = [
   .cs__pagerDir {
     font-family: var(--snds-font-mono);
     font-size: var(--snds-fontSize-micro);
+    font-weight: var(--snds-weight-regular);
     letter-spacing: var(--snds-letterSpacing-wide);
     text-transform: uppercase;
-    color: var(--snds-color-fgSubtle);
+    color: var(--snds-color-fgMuted);
   }
   .cs__pagerName { color: var(--snds-color-fg); font-size: var(--snds-fontSize-lead); }
   .cs__pagerLink:hover .cs__pagerName { color: var(--accent); }
+
+  /* Vivid accents pass AA on the dark panel but not the light one — darken
+     accent TEXT toward the foreground in light mode only. Non-text accents
+     (the head rule, demo gradient) keep the pure hue. */
+  :global(html[data-theme='light']) .cs__num,
+  :global(html[data-theme='light']) .cs__metricVal,
+  :global(html[data-theme='light']) .cs__demoKick,
+  :global(html[data-theme='light']) .cs__close:hover,
+  :global(html[data-theme='light']) .cs__pagerLink:hover .cs__pagerName {
+    color: color-mix(in srgb, var(--accent) 50%, var(--snds-color-fg));
+  }
 </style>
 
 <script>
   const HOME = import.meta.env.BASE_URL;
+
+  // Return to where we came from (restores scroll); else go home.
+  const closeDialog = () => {
+    if (window.history.length > 1) window.history.back();
+    else window.location.assign(HOME);
+  };
+
   const bindClose = () => {
     document.querySelectorAll<HTMLButtonElement>('.cs__close').forEach((b) => {
       if (b.dataset.bound) return;
       b.dataset.bound = 'true';
-      b.addEventListener('click', () => {
-        // return to where we came from (restores scroll); else go home
-        if (window.history.length > 1) window.history.back();
-        else window.location.assign(HOME);
-      });
+      b.addEventListener('click', closeDialog);
     });
   };
+
+  // Click anywhere outside the dialog panel dismisses it. The persistent
+  // header (theme toggle, nav) is excluded so its controls keep working; the
+  // field/backdrop is fair game. Guarded by `.cs` so it stays inert on pages
+  // without a dialog, and bound once to survive view transitions.
+  const onOutsideClick = (e: MouseEvent) => {
+    const panel = document.querySelector('.cs');
+    if (!panel) return; // not a dialog page
+    if (document.querySelector('dialog[open]')) return; // help overlay is open
+    const t = e.target;
+    if (!(t instanceof Element)) return;
+    if (t.closest('.cs') || t.closest('header') || t.closest('dialog')) return;
+    closeDialog();
+  };
+
+  // Keyboard: Esc closes, ←/→ page to prev/next project (via the pager links,
+  // so navigation keeps the view transition). Bound once; inert off-dialog and
+  // deferred to the help overlay when it's open.
+  const onDialogKey = (e: KeyboardEvent) => {
+    if (!document.querySelector('.cs')) return;
+    if (document.querySelector('dialog[open]')) return;
+    const t = e.target;
+    if (t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeDialog();
+    } else if (e.key === 'ArrowLeft') {
+      const prev = document.querySelector<HTMLAnchorElement>('.cs__pager a.cs__pagerLink:not(.cs__pagerLink--next)');
+      if (prev) { e.preventDefault(); prev.click(); }
+    } else if (e.key === 'ArrowRight') {
+      const next = document.querySelector<HTMLAnchorElement>('.cs__pagerLink--next');
+      if (next) { e.preventDefault(); next.click(); }
+    }
+  };
+
   bindClose();
+  if (!(window as unknown as { __csOutsideBound?: boolean }).__csOutsideBound) {
+    (window as unknown as { __csOutsideBound?: boolean }).__csOutsideBound = true;
+    document.addEventListener('click', onOutsideClick);
+    document.addEventListener('keydown', onDialogKey);
+  }
   document.addEventListener('astro:page-load', bindClose);
 </script>

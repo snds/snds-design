@@ -136,6 +136,8 @@ export const vars = createGlobalThemeContract(
       hud: null,
     },
     weight: {
+      extralight: null,
+      light: null,
       regular: null,
       medium: null,
       semibold: null,
@@ -268,6 +270,8 @@ createGlobalTheme(':root', {
     hud: '0.18em',
   },
   weight: {
+    extralight: '200',
+    light: '300',
     regular: '400',
     medium: '500',
     semibold: '600',

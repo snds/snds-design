@@ -25,6 +25,15 @@ globalFontFace(FAMILY, {
   fontDisplay: 'swap',
 });
 
+/* TEST: Tungsten Compressed (Hoefler) — licensed, for UI headers only.
+   All-caps semibold; technical + a touch humanist (Picard S3 LCARS). */
+globalFontFace('Tungsten Compressed', {
+  src: `url("${import.meta.env.BASE_URL.replace(/\/$/, '')}/fonts/tungsten/TungstenCompressed-Semibold.otf") format("opentype")`,
+  fontWeight: '600',
+  fontStyle: 'normal',
+  fontDisplay: 'swap',
+});
+
 /* Mono-led system: display, body, and HUD all ride Berkeley Mono.
    The token layer reads these via var(--snds-font-*-stack, fallback),
    so swapping in a body sans later is a one-line change here. */
@@ -36,5 +45,7 @@ globalStyle(':root', {
     '--snds-font-display-stack': MONO_STACK,
     '--snds-font-sans-stack': MONO_STACK,
     '--snds-font-mono-stack': MONO_STACK,
+    // headers test font (falls back to the mono display if it fails to load)
+    '--snds-font-heading': `"Tungsten Compressed", ${MONO_STACK}`,
   },
 });

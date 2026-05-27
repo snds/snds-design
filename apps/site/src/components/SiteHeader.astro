@@ -1,7 +1,8 @@
 ---
-import { Sun, Moon } from '@phosphor-icons/react';
+import { Question, X } from '@phosphor-icons/react';
 import { url, home } from '../lib/paths';
 import Logo from './Logo.astro';
+import Switch from './Switch.astro';
 ---
 
 <header class="hdr">
@@ -14,12 +15,64 @@ import Logo from './Logo.astro';
     <a href={url('/work')}>Work</a>
     <a href="https://www.linkedin.com/in/snds117-seansands" target="_blank" rel="noopener">LinkedIn</a>
     <a href="mailto:hello@snds.design">Contact</a>
-    <button id="theme-toggle" class="hdr__toggle" type="button" aria-label="Toggle color theme">
-      <span class="ico ico--sun" title="Switch to light"><Sun size={16} weight="regular" /></span>
-      <span class="ico ico--moon" title="Switch to dark"><Moon size={16} weight="regular" /></span>
+    <button id="help-open" class="hdr__toggle" type="button" aria-haspopup="dialog" aria-label="Help, shortcuts &amp; settings">
+      <Question size={18} weight="regular" />
     </button>
   </nav>
 </header>
+
+<!-- Native <dialog>: focus trap, Esc-to-close, top-layer, ::backdrop for free.
+     Persisted with the header, so a single instance serves every page. -->
+<dialog id="help-dialog" class="kbd" aria-labelledby="kbd-title">
+  <div class="kbd__panel">
+    <div class="kbd__head">
+      <h2 id="kbd-title">Shortcuts &amp; settings</h2>
+      <button class="hdr__toggle" type="button" data-kbd-close aria-label="Close">
+        <X size={16} weight="regular" />
+      </button>
+    </div>
+
+    <section class="kbd__group">
+      <h3>Global</h3>
+      <dl>
+        <div><dt><kbd>?</kbd></dt><dd>Show this help</dd></div>
+        <div><dt><kbd>T</kbd></dt><dd>Toggle light / dark theme</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd>Close dialog or help</dd></div>
+      </dl>
+    </section>
+
+    <section class="kbd__group">
+      <h3>Home</h3>
+      <dl>
+        <div><dt><kbd>↓</kbd> <kbd>J</kbd></dt><dd>Next section</dd></div>
+        <div><dt><kbd>↑</kbd> <kbd>K</kbd></dt><dd>Previous section</dd></div>
+        <div><dt><kbd>Home</kbd> <kbd>End</kbd></dt><dd>First / last section</dd></div>
+      </dl>
+    </section>
+
+    <section class="kbd__group">
+      <h3>Case study</h3>
+      <dl>
+        <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Previous / next project</dd></div>
+        <div><dt><kbd>Esc</kbd></dt><dd>Close the project</dd></div>
+      </dl>
+    </section>
+
+    <hr class="kbd__divider" />
+
+    <section class="kbd__group kbd__settings">
+      <h3>Settings</h3>
+      <div class="set__row">
+        <span id="set-theme-label" class="set__label">Light theme</span>
+        <Switch id="set-theme" labelledby="set-theme-label" />
+      </div>
+      <div class="set__row">
+        <span id="set-motion-label" class="set__label">Reduce motion</span>
+        <Switch id="set-motion" labelledby="set-motion-label" />
+      </div>
+    </section>
+  </div>
+</dialog>
 
 <style>
   .hdr {
@@ -71,31 +124,157 @@ import Logo from './Logo.astro';
     transition: background 120ms;
   }
   .hdr__toggle:hover { background: color-mix(in srgb, var(--snds-color-fg) 12%, transparent); }
-  .hdr__toggle .ico { display: none; }
-  /* show the icon of the mode you'll switch TO (selector includes .hdr__toggle
-     so it outranks the hide rule above) */
-  :global(html[data-theme='dark']) .hdr__toggle .ico--sun { display: grid; }
-  :global(html[data-theme='light']) .hdr__toggle .ico--moon { display: grid; }
 
   @media (max-width: 560px) {
     .hdr__nav { gap: var(--snds-space-3); }
     .hdr__nav a:nth-child(2) { display: none; }
     .hdr__word { display: none; }
   }
+
+  /* Keyboard-shortcuts overlay (native dialog) */
+  .kbd {
+    margin: auto; /* center in the top layer */
+    width: min(420px, calc(100vw - 2 * var(--snds-grid-margin)));
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--snds-color-fg);
+  }
+  .kbd::backdrop {
+    background: color-mix(in srgb, #000 55%, transparent);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  .kbd__panel {
+    background: color-mix(in srgb, var(--snds-color-bg) 94%, transparent);
+    border: 1px solid var(--snds-color-border);
+    border-radius: var(--snds-radius-lg);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    padding: var(--snds-space-6);
+  }
+  .kbd__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--snds-space-5);
+  }
+  .kbd__head h2 {
+    font-family: var(--snds-font-mono);
+    font-size: var(--snds-fontSize-lead);
+    font-weight: var(--snds-weight-medium);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .kbd__group { margin-bottom: var(--snds-space-5); }
+  .kbd__group:last-child { margin-bottom: 0; }
+  .kbd__group h3 {
+    font-family: var(--snds-font-mono);
+    font-size: var(--snds-fontSize-micro);
+    font-weight: var(--snds-weight-regular);
+    letter-spacing: var(--snds-letterSpacing-hud);
+    text-transform: uppercase;
+    color: var(--snds-color-fgMuted);
+    margin-bottom: var(--snds-space-3);
+  }
+  .kbd dl { display: grid; gap: var(--snds-space-2); margin: 0; }
+  .kbd dl > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--snds-space-4);
+  }
+  .kbd dt { display: flex; gap: 4px; flex: none; }
+  .kbd dd { margin: 0; color: var(--snds-color-fgMuted); font-size: var(--snds-fontSize-caption); text-align: right; }
+  .kbd kbd {
+    font-family: var(--snds-font-mono);
+    font-size: var(--snds-fontSize-micro);
+    line-height: 1;
+    color: var(--snds-color-fg);
+    background: var(--snds-color-bgElevated);
+    border: 1px solid var(--snds-color-border);
+    border-radius: var(--snds-radius-sm);
+    padding: 4px 7px;
+    min-width: 1.6em;
+    text-align: center;
+  }
+
+  /* divider between controls (shortcuts) and settings */
+  .kbd__divider {
+    height: 1px;
+    margin: var(--snds-space-5) 0;
+    border: none;
+    background: var(--snds-color-border);
+  }
+  .set__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--snds-space-4);
+    min-height: 32px;
+  }
+  .set__row + .set__row { margin-top: var(--snds-space-2); }
+  .set__label { color: var(--snds-color-fg); font-size: var(--snds-fontSize-caption); }
 </style>
 
 <script>
-  const bind = () => {
-    const btn = document.getElementById('theme-toggle');
-    if (!btn || btn.dataset.bound) return;
-    btn.dataset.bound = 'true';
-    btn.addEventListener('click', () => {
-      const html = document.documentElement;
-      const next = html.dataset.theme === 'light' ? 'dark' : 'light';
-      html.dataset.theme = next;
-      try { localStorage.setItem('snds-theme', next); } catch {}
-    });
+  const root = () => document.documentElement;
+
+  const toggleTheme = () => {
+    const next = root().dataset.theme === 'light' ? 'dark' : 'light';
+    root().dataset.theme = next;
+    try { localStorage.setItem('snds-theme', next); } catch {}
+    syncSwitches();
   };
+
+  // Persist a motion override, then let the Layout controller apply it
+  // (sets data-motion + starts/stops Lenis). Falls back to setting the
+  // attribute directly if the controller isn't ready.
+  const toggleMotion = () => {
+    const reducedNow = root().dataset.motion === 'reduce';
+    try { localStorage.setItem('snds-motion', reducedNow ? 'full' : 'reduce'); } catch {}
+    const apply = (window as unknown as { __applyMotion?: () => void }).__applyMotion;
+    if (apply) apply();
+    else root().dataset.motion = reducedNow ? 'full' : 'reduce';
+    syncSwitches();
+  };
+
+  // Reflect current state onto the settings switches.
+  const syncSwitches = () => {
+    document.getElementById('set-theme')?.setAttribute('aria-checked', String(root().dataset.theme === 'light'));
+    document.getElementById('set-motion')?.setAttribute('aria-checked', String(root().dataset.motion === 'reduce'));
+  };
+
+  // Header persists across view transitions → guard each listener so re-init
+  // doesn't stack duplicates.
+  const bind = () => {
+    const help = document.getElementById('help-dialog') as HTMLDialogElement | null;
+    const openBtn = document.getElementById('help-open');
+    if (help && openBtn && !openBtn.dataset.bound) {
+      openBtn.dataset.bound = 'true';
+      openBtn.addEventListener('click', () => { if (!help.open) { syncSwitches(); help.showModal(); } });
+      help.querySelector('[data-kbd-close]')?.addEventListener('click', () => help.close());
+      help.addEventListener('click', (e) => { if (e.target === help) help.close(); }); // backdrop
+      document.getElementById('set-theme')?.addEventListener('click', toggleTheme);
+      document.getElementById('set-motion')?.addEventListener('click', toggleMotion);
+    }
+    syncSwitches();
+  };
+
+  const isTyping = (t: EventTarget | null) =>
+    t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+
+  // Global keys, bound once. Page-specific keys live in their own scripts.
+  if (!(window as unknown as { __kbdGlobal?: boolean }).__kbdGlobal) {
+    (window as unknown as { __kbdGlobal?: boolean }).__kbdGlobal = true;
+    document.addEventListener('keydown', (e) => {
+      if (isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
+      const help = document.getElementById('help-dialog') as HTMLDialogElement | null;
+      if (e.key === '?') { e.preventDefault(); if (help && !help.open) { syncSwitches(); help.showModal(); } }
+      else if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleTheme(); }
+    });
+  }
+
   bind();
   document.addEventListener('astro:page-load', bind);
 </script>

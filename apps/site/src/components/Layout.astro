@@ -39,8 +39,19 @@ const {
           if (t) document.documentElement.dataset.theme = t;
         } catch (e) {}
       };
+      // motion preference, pre-paint (no flash). Explicit 'full' overrides the
+      // OS preference; otherwise the OS prefers-reduced-motion wins.
+      const applyMotionAttr = () => {
+        try {
+          const o = localStorage.getItem('snds-motion');
+          const reduced = o === 'reduce'
+            || (o !== 'full' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+          document.documentElement.dataset.motion = reduced ? 'reduce' : 'full';
+        } catch (e) {}
+      };
       applyTheme();
-      document.addEventListener('astro:after-swap', applyTheme);
+      applyMotionAttr();
+      document.addEventListener('astro:after-swap', () => { applyTheme(); applyMotionAttr(); });
     </script>
     <slot name="head" />
   </head>
@@ -61,18 +72,44 @@ const {
 
     <script>
       import Lenis from 'lenis';
-      // init once; survives view transitions (window persists)
-      const w = window as unknown as { __lenis?: { raf: (t: number) => void } };
-      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!reduce && !w.__lenis) {
+      // Motion controller (survives view transitions; window persists). Owns
+      // Lenis lifecycle so the reduce-motion toggle can stop/start smoothing at
+      // runtime. data-motion is the single source of truth.
+      type W = {
+        __lenis?: { raf: (t: number) => void; destroy: () => void };
+        __lenisRaf?: number;
+        __applyMotion?: () => void;
+      };
+      const w = window as unknown as W;
+
+      const startLenis = () => {
+        if (w.__lenis) return;
         const lenis = new Lenis({ lerp: 0.085, smoothWheel: true, wheelMultiplier: 1 });
-        const raf = (time: number) => {
-          lenis.raf(time);
-          requestAnimationFrame(raf);
-        };
-        requestAnimationFrame(raf);
+        const raf = (time: number) => { lenis.raf(time); w.__lenisRaf = requestAnimationFrame(raf); };
+        w.__lenisRaf = requestAnimationFrame(raf);
         w.__lenis = lenis;
-      }
+      };
+      const stopLenis = () => {
+        if (!w.__lenis) return;
+        if (w.__lenisRaf) cancelAnimationFrame(w.__lenisRaf);
+        try { w.__lenis.destroy(); } catch (e) {}
+        w.__lenis = undefined;
+      };
+      const reducedMotion = () => {
+        try {
+          const o = localStorage.getItem('snds-motion');
+          if (o === 'reduce') return true;
+          if (o === 'full') return false;
+        } catch (e) {}
+        return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      };
+      w.__applyMotion = () => {
+        const reduced = reducedMotion();
+        document.documentElement.dataset.motion = reduced ? 'reduce' : 'full';
+        if (reduced) stopLenis(); else startLenis();
+      };
+      w.__applyMotion();
+      document.addEventListener('astro:after-swap', () => w.__applyMotion?.());
     </script>
   </body>
 </html>

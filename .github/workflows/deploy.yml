@@ -29,17 +29,37 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Quality gate (1/2): component-level a11y + unit tests for @snds/ui.
+      # Fast, no browser needed (jsdom + axe-core). Runs before build.
+      - name: Component a11y tests
+        run: npm run test
       # Inject the licensed Berkeley Mono woff2 from encrypted secrets so the
       # live site renders correctly — without the font living in the repo.
-      - name: Restore licensed font
+      - name: Restore licensed fonts
         run: |
           mkdir -p apps/site/public/fonts/berkeley-mono
           printf '%s' "$BM_REGULAR" | base64 -d > apps/site/public/fonts/berkeley-mono/BerkeleyMonoVariable-Regular.woff2
           printf '%s' "$BM_ITALIC" | base64 -d > apps/site/public/fonts/berkeley-mono/BerkeleyMonoVariable-Italic.woff2
+          # Tungsten Compressed (display headings) — only if the secret is set;
+          # otherwise headings gracefully fall back to Berkeley Mono.
+          mkdir -p apps/site/public/fonts/tungsten
+          if [ -n "$TUNGSTEN_SEMIBOLD" ]; then
+            printf '%s' "$TUNGSTEN_SEMIBOLD" | base64 -d > apps/site/public/fonts/tungsten/TungstenCompressed-Semibold.otf
+          fi
         env:
           BM_REGULAR: ${{ secrets.BM_REGULAR_WOFF2 }}
           BM_ITALIC: ${{ secrets.BM_ITALIC_WOFF2 }}
+          TUNGSTEN_SEMIBOLD: ${{ secrets.TUNGSTEN_SEMIBOLD_OTF }}
       - run: npm run build
+      # Quality gate (2/2): page-level a11y. Playwright boots its bundled
+      # Chromium, serves the built dist via `astro preview`, and runs axe over
+      # every route in both themes. A violation fails this job, so the artifact
+      # below never uploads and the dependent `deploy` job is skipped — gating
+      # the deploy.
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Page a11y scan (axe on built site)
+        run: npm run test:a11y
       # NOTE: deploying to a project subpath (user.github.io/repo) requires
       # `base: '/repo/'` in astro.config.mjs. For a custom domain at the root
       # (snds.design) keep base '/' and add a CNAME file in apps/site/public/.

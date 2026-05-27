@@ -44,12 +44,14 @@ import { url } from '../../lib/paths';
     font-size: var(--snds-fontSize-caption);
     letter-spacing: var(--snds-letterSpacing-hud);
     text-transform: uppercase;
-    color: var(--snds-color-fgSubtle);
+    color: var(--snds-color-fgMuted);
   }
   .work__title {
-    font-size: clamp(3rem, 9vw, 7rem);
-    letter-spacing: -0.04em;
-    font-weight: 500;
+    font-family: var(--snds-font-heading);
+    text-transform: uppercase;
+    font-size: clamp(3.75rem, 11vw, 8.5rem);
+    letter-spacing: 0;
+    font-weight: 600;
     margin: var(--snds-space-2) 0 var(--snds-space-4);
   }
   .work__lede {
@@ -75,10 +77,16 @@ import { url } from '../../lib/paths';
     font-size: var(--snds-fontSize-caption);
     color: var(--accent);
   }
+  /* Vivid accent passes AA on dark, fails on the light surface — darken
+     toward the foreground only in light mode (keeps dark vivid). */
+  :global(html[data-theme='light']) .work__num { color: color-mix(in srgb, var(--accent) 50%, var(--snds-color-fg)); }
   .work__name {
     display: block;
-    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
-    letter-spacing: -0.025em;
+    font-family: var(--snds-font-heading);
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: clamp(1.6rem, 3.6vw, 2.7rem);
+    letter-spacing: 0.01em;
     color: var(--snds-color-fg);
   }
   .work__sum {
