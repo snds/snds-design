@@ -274,9 +274,11 @@ export interface HeroFieldProps {
   /** Dialog pages: field keeps simulating behind, but no interaction +
       calm camera + no active node (the home UI is overlaid by a dialog). */
   dialog?: boolean;
+  /** Light theme: dark particles on light, normal blending; colors from tokens. */
+  light?: boolean;
 }
 
-export function HeroField({ frozen = false, dialog = false }: HeroFieldProps) {
+export function HeroField({ frozen = false, dialog = false, light = false }: HeroFieldProps) {
   const gl = useThree((s) => s.gl);
   const groupRef = useRef<THREE.Group>(null);
   const pointsRef = useRef<THREE.Points>(null);
@@ -646,6 +648,24 @@ export function HeroField({ frozen = false, dialog = false }: HeroFieldProps) {
       window.removeEventListener('blur', onUp);
     };
   }, []);
+
+  // retheme the field from design tokens + switch blending for light mode.
+  // value endpoints flip with the theme (neutral-1 ≈ bg, neutral-12 ≈ fg),
+  // so dark = bright particles + additive glow, light = dark particles + normal.
+  useEffect(() => {
+    const root = getComputedStyle(document.documentElement);
+    const v = (name: string, fallback: string) => root.getPropertyValue(name).trim() || fallback;
+    const u = sim.uniforms;
+    u.uHi.value.set(v('--snds-neutral-12', '#eef3f7'));
+    u.uShadow.value.set(v('--snds-neutral-1', '#0e151b'));
+    u.uCool.value.set(v('--snds-primary-9', '#22d3e0'));
+    u.uWarm.value.set(v('--snds-data-violet-9', '#7c6cff'));
+    u.uSignal.value.set(v('--snds-signal-9', '#ff4d4d'));
+    const blend = light ? THREE.NormalBlending : THREE.AdditiveBlending;
+    [matRef.current, connectorMatRef.current, joinMatRef.current].forEach((mm) => {
+      if (mm) { mm.blending = blend; mm.needsUpdate = true; }
+    });
+  }, [light, sim]);
 
   return (
     <group ref={groupRef}>

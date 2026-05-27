@@ -29,9 +29,22 @@ function useFieldDialog() {
   return dialog;
 }
 
+function useLightTheme() {
+  const [light, setLight] = useState(false);
+  useEffect(() => {
+    const read = () => setLight(document.documentElement.dataset.theme === 'light');
+    read();
+    const obs = new MutationObserver(read);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
+  return light;
+}
+
 export default function HeroCanvas() {
   const reduced = usePrefersReducedMotion();
   const dialog = useFieldDialog();
+  const light = useLightTheme();
   return (
     <Canvas
       camera={{ position: [0, 0, 5.5], fov: 50 }}
@@ -40,8 +53,8 @@ export default function HeroCanvas() {
       style={{ position: 'absolute', inset: 0 }}
       frameloop={reduced ? 'demand' : 'always'}
     >
-      <Nebula frozen={reduced} />
-      <HeroField frozen={reduced} dialog={dialog} />
+      <Nebula frozen={reduced} light={light} />
+      <HeroField frozen={reduced} dialog={dialog} light={light} />
     </Canvas>
   );
 }

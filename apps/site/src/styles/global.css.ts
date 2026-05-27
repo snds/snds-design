@@ -6,7 +6,7 @@ import './fonts.css';
    [data-active=true], plays the inverse (wipes back out) when it leaves.
    65% black + backdrop blur so it reads over bright particles. */
 globalStyle('.snds-node-tag', {
-  background: 'rgba(0, 0, 0, 0.65)',
+  background: 'color-mix(in srgb, var(--snds-color-bg) 72%, transparent)',
   // @ts-expect-error vendor-prefixed
   WebkitBackdropFilter: 'blur(8px)',
   backdropFilter: 'blur(8px)',
@@ -122,9 +122,10 @@ globalStyle('.field-mute', {
   transition: 'opacity 520ms ease, background 520ms ease, backdrop-filter 520ms ease, -webkit-backdrop-filter 520ms ease',
 });
 globalStyle('html[data-field="dialog"] .field-mute', {
-  // light dim so the field keeps reading as live/simulating behind the dialog
+  // light dim so the field keeps reading as live/simulating behind the dialog;
+  // theme-aware so it dims correctly in light mode too
   opacity: 1,
-  background: 'rgba(6, 8, 12, 0.42)',
+  background: 'color-mix(in srgb, var(--snds-color-bg) 45%, transparent)',
   // @ts-expect-error vendor-prefixed
   WebkitBackdropFilter: 'blur(4px)',
   backdropFilter: 'blur(4px)',
