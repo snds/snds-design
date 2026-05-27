@@ -40,16 +40,16 @@ jobs:
           mkdir -p apps/site/public/fonts/berkeley-mono
           printf '%s' "$BM_REGULAR" | base64 -d > apps/site/public/fonts/berkeley-mono/BerkeleyMonoVariable-Regular.woff2
           printf '%s' "$BM_ITALIC" | base64 -d > apps/site/public/fonts/berkeley-mono/BerkeleyMonoVariable-Italic.woff2
-          # Tungsten Compressed (display headings) — only if the secret is set;
-          # otherwise headings gracefully fall back to Berkeley Mono.
+          # Tungsten Compressed (display headings), subset woff2 — only if the
+          # secret is set; otherwise headings fall back to Berkeley Mono.
           mkdir -p apps/site/public/fonts/tungsten
           if [ -n "$TUNGSTEN_SEMIBOLD" ]; then
-            printf '%s' "$TUNGSTEN_SEMIBOLD" | base64 -d > apps/site/public/fonts/tungsten/TungstenCompressed-Semibold.otf
+            printf '%s' "$TUNGSTEN_SEMIBOLD" | base64 -d > apps/site/public/fonts/tungsten/TungstenCompressed-Semibold.woff2
           fi
         env:
           BM_REGULAR: ${{ secrets.BM_REGULAR_WOFF2 }}
           BM_ITALIC: ${{ secrets.BM_ITALIC_WOFF2 }}
-          TUNGSTEN_SEMIBOLD: ${{ secrets.TUNGSTEN_SEMIBOLD_OTF }}
+          TUNGSTEN_SEMIBOLD: ${{ secrets.TUNGSTEN_SEMIBOLD_WOFF2 }}
       - run: npm run build
       # Quality gate (2/2): page-level a11y. Playwright boots its bundled
       # Chromium, serves the built dist via `astro preview`, and runs axe over

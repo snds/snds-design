@@ -28,7 +28,7 @@ globalFontFace(FAMILY, {
 /* TEST: Tungsten Compressed (Hoefler) — licensed, for UI headers only.
    All-caps semibold; technical + a touch humanist (Picard S3 LCARS). */
 globalFontFace('Tungsten Compressed', {
-  src: `url("${import.meta.env.BASE_URL.replace(/\/$/, '')}/fonts/tungsten/TungstenCompressed-Semibold.otf") format("opentype")`,
+  src: `url("${import.meta.env.BASE_URL.replace(/\/$/, '')}/fonts/tungsten/TungstenCompressed-Semibold.woff2") format("woff2")`,
   fontWeight: '600',
   fontStyle: 'normal',
   fontDisplay: 'swap',
