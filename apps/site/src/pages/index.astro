@@ -98,13 +98,16 @@ import { url } from '../lib/paths';
   .title em { font-style: italic; color: var(--snds-color-fgMuted); }
   .lede { max-width: 46ch; margin-top: var(--snds-space-6); color: var(--snds-color-fgMuted); font-size: var(--snds-fontSize-lead); line-height: var(--snds-lineHeight-snug); }
 
-  /* readability oval — blurs + darkens the field behind body copy */
+  /* readability oval — blurs + darkens the field behind body copy.
+     A radial mask feathers BOTH the dark gradient and the blur so there's
+     no sharp edge where the blur stops. */
   .lede, .caseblurb { position: relative; }
   .lede::before, .caseblurb::before {
-    content: ''; position: absolute; z-index: -1; inset: -32px -64px;
-    border-radius: 50%;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 70%);
+    content: ''; position: absolute; z-index: -1; inset: -44px -80px;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 72%);
     -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 35%, rgba(0,0,0,0) 72%);
+    mask-image: radial-gradient(ellipse at center, #000 35%, rgba(0,0,0,0) 72%);
     pointer-events: none;
   }
   .hud { font-family: var(--snds-font-mono); font-size: var(--snds-fontSize-micro); letter-spacing: var(--snds-letterSpacing-hud); text-transform: uppercase; color: var(--snds-color-fgSubtle); }

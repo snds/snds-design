@@ -297,10 +297,10 @@ export function HeroField({ frozen = false, muted = false }: HeroFieldProps) {
   const camTarget = useRef(new THREE.Vector3(0, 0, 5.5));
   const tmpV = useRef(new THREE.Vector3());
   const tmpC = useRef(new THREE.Color());
-  // mouse-orbit ↔ scroll handoff
-  const mouseWeight = useRef(1);
-  const lastScrollY = useRef(0);
-  const lastScrollT = useRef(-10);
+  // click-and-hold camera orbit + release momentum
+  const dragging = useRef(false);
+  const orbit = useRef({ yaw: 0, pitch: 0 });
+  const orbitVel = useRef({ yaw: 0, pitch: 0 });
   const rightVec = useRef(new THREE.Vector3());
 
   const sim = useMemo(() => {
@@ -564,15 +564,6 @@ export function HeroField({ frozen = false, muted = false }: HeroFieldProps) {
       const vh = Math.max(window.innerHeight, 1);
       const sy = window.scrollY;
 
-      // scroll detection → suppress mouse-orbit during/just-after scroll, ease
-      // it back when idle, so the camera animates from wherever the mouse left
-      // it to the scroll destination.
-      if (Math.abs(sy - lastScrollY.current) > 0.4) lastScrollT.current = t;
-      lastScrollY.current = sy;
-      const scrolling = t - lastScrollT.current < 0.25;
-      mouseWeight.current += ((scrolling ? 0 : 1) - mouseWeight.current) * 0.07;
-      const mw = frozen ? 0 : mouseWeight.current;
-
       const p = Math.min(Math.max(sy / vh, 0), N);
       const i0 = Math.floor(p);
       const i1 = Math.min(i0 + 1, N);
@@ -580,10 +571,28 @@ export function HeroField({ frozen = false, muted = false }: HeroFieldProps) {
       const f = raw * raw * raw * (raw * (raw * 6 - 15) + 10); // smootherstep
       slerpDir(VIEW_DIRS[i0], VIEW_DIRS[i1], f, tmpV.current);
 
-      // mouse orbit (yaw + pitch) scaled by the eased weight + faint idle sway
-      tmpV.current.applyAxisAngle(Y_AXIS, ndc.current.x * 0.5 * mw + Math.sin(t * 0.06) * 0.03);
+      // ---- click-and-hold orbit: while held, softly link the orbit to the
+      // cursor; on release, coast on momentum + slowly re-center. Passive. ----
+      const o = orbit.current;
+      const prevYaw = o.yaw;
+      const prevPitch = o.pitch;
+      if (dragging.current) {
+        o.yaw += (ndc.current.x * 0.6 - o.yaw) * 0.12;
+        o.pitch += (ndc.current.y * 0.4 - o.pitch) * 0.12;
+        orbitVel.current.yaw = o.yaw - prevYaw;
+        orbitVel.current.pitch = o.pitch - prevPitch;
+      } else {
+        o.yaw += orbitVel.current.yaw;
+        o.pitch += orbitVel.current.pitch;
+        orbitVel.current.yaw *= 0.94; // friction
+        orbitVel.current.pitch *= 0.94;
+        o.yaw += (0 - o.yaw) * 0.01; // gentle re-center
+        o.pitch += (0 - o.pitch) * 0.01;
+      }
+
+      tmpV.current.applyAxisAngle(Y_AXIS, o.yaw + Math.sin(t * 0.06) * 0.03);
       rightVec.current.crossVectors(tmpV.current, Y_AXIS).normalize();
-      tmpV.current.applyAxisAngle(rightVec.current, ndc.current.y * 0.3 * mw);
+      tmpV.current.applyAxisAngle(rightVec.current, o.pitch);
       tmpV.current.setLength(5.6);
       tmpV.current.y += 0.4 + Math.sin(t * 0.05) * 0.15;
       camTarget.current.copy(tmpV.current);
@@ -600,14 +609,29 @@ export function HeroField({ frozen = false, muted = false }: HeroFieldProps) {
   });
 
   useEffect(() => {
-    const onPointer = (e: PointerEvent) => {
+    const onMove = (e: PointerEvent) => {
       ndc.current.set(
         (e.clientX / window.innerWidth) * 2 - 1,
         -((e.clientY / window.innerHeight) * 2 - 1),
       );
     };
-    window.addEventListener('pointermove', onPointer, { passive: true });
-    return () => window.removeEventListener('pointermove', onPointer);
+    // click-and-hold to orbit (mouse only — touch stays for scrolling)
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse') dragging.current = true;
+    };
+    const onUp = () => { dragging.current = false; };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    window.addEventListener('pointerdown', onDown, { passive: true });
+    window.addEventListener('pointerup', onUp, { passive: true });
+    window.addEventListener('pointercancel', onUp, { passive: true });
+    window.addEventListener('blur', onUp);
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerdown', onDown);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      window.removeEventListener('blur', onUp);
+    };
   }, []);
 
   return (
