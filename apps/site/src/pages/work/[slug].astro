@@ -28,12 +28,12 @@ const meta = [
 ];
 ---
 
-<Layout title={`${d.title} — SNDS`} description={d.summary}>
+<Layout title={`${d.title} — SNDS`} description={d.summary} fieldMode="muted">
   <main id="main-content" class="cs" style={`--accent:${accent}`}>
     <a href={url('/work')} class="cs__back">← All work</a>
 
     <header class="cs__head">
-      <p class="cs__num">{cs?.num ?? '—'} / 05 · {cs?.colorName}</p>
+      <p class="cs__num">{cs?.num ?? '—'} / 05 · {d.client}</p>
       <h1 class="cs__title">{d.title}</h1>
       <p class="cs__summary">{d.summary}</p>
       <ul class="cs__tags">
@@ -125,6 +125,7 @@ const meta = [
     font-size: clamp(2.75rem, 7vw, 5.5rem);
     line-height: 1.0;
     letter-spacing: -0.035em;
+    font-weight: 500;
     margin: var(--snds-space-3) 0 var(--snds-space-4);
   }
   .cs__summary {

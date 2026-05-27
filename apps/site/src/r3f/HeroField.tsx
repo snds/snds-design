@@ -163,7 +163,7 @@ void main(){
   // depth of field: out-of-focus particles grow into soft bokeh discs
   vCoc = clamp(abs(vDepth - uFocus) / uDofRange, 0.0, 1.0);
   float size = aScale * uSize * uPixelRatio * (8.0 / vDepth)
-             * (0.5 + vDens * 0.9) * (1.0 + infl * 1.2)
+             * (0.5 + vDens * 0.9) * (1.0 + infl * 0.5)
              * (1.0 + vCoc * 2.2) * (1.0 + vNode * 0.6);
   gl_PointSize = clamp(size, 1.0, 120.0);
 }
@@ -189,11 +189,11 @@ void main(){
   col = mix(col, uWarm, smoothstep(0.25, 0.7, chaos) * 0.5);
   col = mix(col, uSignal, smoothstep(0.6, 1.0, chaos) * 0.8);
   col = mix(col, uNodeColor, vNode * 0.7);                  // node light diffuse
-  col = mix(col, mix(uCool, vec3(1.0), 0.65), vGlow);
+  col = mix(col, mix(uCool, vec3(1.0), 0.5), vGlow * 0.4);  // softened cursor light
 
   float a = soft * clamp(vShade, 0.06, 1.0) * (0.32 + vDens * 0.78);
   a *= (1.0 - vCoc * 0.62);                                 // blur → dimmer
-  a = clamp(a + vGlow * 0.5 + vNode * 0.28, 0.0, 1.0);
+  a = clamp(a + vGlow * 0.18 + vNode * 0.28, 0.0, 1.0);
   gl_FragColor = vec4(col, a);
 }
 `;
@@ -269,10 +269,13 @@ void main(){
 `;
 
 export interface HeroFieldProps {
+  /** Reduced-motion: fully static. */
   frozen?: boolean;
+  /** Detail/work pages: sim frozen, no pointer, calm camera, no active node. */
+  muted?: boolean;
 }
 
-export function HeroField({ frozen = false }: HeroFieldProps) {
+export function HeroField({ frozen = false, muted = false }: HeroFieldProps) {
   const gl = useThree((s) => s.gl);
   const groupRef = useRef<THREE.Group>(null);
   const pointsRef = useRef<THREE.Points>(null);
@@ -294,6 +297,11 @@ export function HeroField({ frozen = false }: HeroFieldProps) {
   const camTarget = useRef(new THREE.Vector3(0, 0, 5.5));
   const tmpV = useRef(new THREE.Vector3());
   const tmpC = useRef(new THREE.Color());
+  // mouse-orbit ↔ scroll handoff
+  const mouseWeight = useRef(1);
+  const lastScrollY = useRef(0);
+  const lastScrollT = useRef(-10);
+  const rightVec = useRef(new THREE.Vector3());
 
   const sim = useMemo(() => {
     const gpu = new GPUComputationRenderer(TW, TH, gl);
@@ -485,7 +493,7 @@ export function HeroField({ frozen = false }: HeroFieldProps) {
     const t = (v.uTime.value += frozen ? 0 : dt);
 
     let next = -1;
-    if (!frozen && typeof window !== 'undefined') {
+    if (!frozen && !muted && typeof window !== 'undefined') {
       const vh = Math.max(window.innerHeight, 1);
       const idx = Math.round(window.scrollY / vh);
       next = idx >= 1 && idx <= NODES_3D.length ? idx - 1 : -1;
@@ -495,7 +503,7 @@ export function HeroField({ frozen = false }: HeroFieldProps) {
       setActive(next);
     }
 
-    if (!frozen) {
+    if (!frozen && !muted) {
       const lfo = 0.5 + 0.5 * Math.sin(t * 0.08);
       v.uFluid.value = 0.5 + Math.pow(lfo, 2.0) * 1.0;
       v.uSpring.value = 0.85 + (1.0 - lfo) * 0.3;
@@ -512,6 +520,9 @@ export function HeroField({ frozen = false }: HeroFieldProps) {
       sim.posVar.material.uniforms.dt.value = dt;
       sim.gpu.compute();
       if (groupRef.current) groupRef.current.rotation.y = 0;
+    } else if (muted) {
+      // detail/work pages: freeze sim, kill the cursor light
+      m.uniforms.uPointer.value.set(999, 999, 999);
     }
 
     // node markers: position bob + gradual scale
@@ -539,18 +550,42 @@ export function HeroField({ frozen = false }: HeroFieldProps) {
       sim.uNodeStrength.value += (0.0 - sim.uNodeStrength.value) * 0.05;
     }
 
-    if (!frozen && typeof window !== 'undefined') {
+    if (muted) {
+      // calm, slow auto-orbit; no scroll mapping, no mouse, fill → default
+      const a = t * 0.04;
+      tmpV.current.copy(VIEW_DIRS[0]).applyAxisAngle(Y_AXIS, Math.sin(a) * 0.35).setLength(6.4);
+      tmpV.current.y += 0.5;
+      camTarget.current.copy(tmpV.current);
+      state.camera.position.lerp(camTarget.current, 0.04);
+      state.camera.lookAt(0, 0, 0);
+      m.uniforms.uFillColor.value.lerp(DEFAULT_FILL, 0.04);
+    } else if (!frozen && typeof window !== 'undefined') {
       const N = NODES_3D.length;
       const vh = Math.max(window.innerHeight, 1);
-      const p = Math.min(Math.max(window.scrollY / vh, 0), N);
+      const sy = window.scrollY;
+
+      // scroll detection → suppress mouse-orbit during/just-after scroll, ease
+      // it back when idle, so the camera animates from wherever the mouse left
+      // it to the scroll destination.
+      if (Math.abs(sy - lastScrollY.current) > 0.4) lastScrollT.current = t;
+      lastScrollY.current = sy;
+      const scrolling = t - lastScrollT.current < 0.25;
+      mouseWeight.current += ((scrolling ? 0 : 1) - mouseWeight.current) * 0.07;
+      const mw = frozen ? 0 : mouseWeight.current;
+
+      const p = Math.min(Math.max(sy / vh, 0), N);
       const i0 = Math.floor(p);
       const i1 = Math.min(i0 + 1, N);
       const raw = p - i0;
       const f = raw * raw * raw * (raw * (raw * 6 - 15) + 10); // smootherstep
       slerpDir(VIEW_DIRS[i0], VIEW_DIRS[i1], f, tmpV.current);
-      tmpV.current.applyAxisAngle(Y_AXIS, Math.sin(t * 0.08) * 0.06);
+
+      // mouse orbit (yaw + pitch) scaled by the eased weight + faint idle sway
+      tmpV.current.applyAxisAngle(Y_AXIS, ndc.current.x * 0.5 * mw + Math.sin(t * 0.06) * 0.03);
+      rightVec.current.crossVectors(tmpV.current, Y_AXIS).normalize();
+      tmpV.current.applyAxisAngle(rightVec.current, ndc.current.y * 0.3 * mw);
       tmpV.current.setLength(5.6);
-      tmpV.current.y += 0.4 + Math.sin(t * 0.05) * 0.25;
+      tmpV.current.y += 0.4 + Math.sin(t * 0.05) * 0.15;
       camTarget.current.copy(tmpV.current);
       state.camera.position.lerp(camTarget.current, 0.16);
       state.camera.lookAt(0, 0, 0);
@@ -623,14 +658,14 @@ export function HeroField({ frozen = false }: HeroFieldProps) {
               <meshBasicMaterial color={n.color} transparent opacity={0.14} toneMapped={false} blending={THREE.AdditiveBlending} depthWrite={false} />
             </mesh>
           </group>
-          {active === i && !frozen && (
+          {!frozen && (
             <Html position={[0, 0.4, 0]} center zIndexRange={[7, 0]} style={{ pointerEvents: 'none' }}>
               <div
                 className="snds-node-tag"
+                data-active={active === i ? 'true' : 'false'}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px',
                   border: `1px solid ${n.cs.color}`,
-                  background: 'color-mix(in srgb, var(--snds-color-bg) 78%, transparent)',
                   fontFamily: 'var(--snds-font-mono)', fontSize: 11, letterSpacing: '0.12em',
                   textTransform: 'uppercase', whiteSpace: 'nowrap', color: 'var(--snds-color-fg)',
                 }}

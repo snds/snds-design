@@ -23,6 +23,10 @@ apps/site/public/fonts/berkeley-mono/*.woff
 apps/site/public/fonts/berkeley-mono/*.ttf
 apps/site/public/fonts/berkeley-mono/*.otf
 
+# working drops / references — not part of the build
+/visual-examples/
+/snds-new-logo-only.svg
+
 # os / editor
 .DS_Store
 *.log

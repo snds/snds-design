@@ -1,16 +1,26 @@
-import { globalStyle, keyframes } from '@vanilla-extract/css';
+import { globalStyle } from '@vanilla-extract/css';
 import { vars } from '@snds/ui/tokens';
 import './fonts.css';
 
-/* Node info-box reveal — a left-to-right mask wipe (ease-out entrance). */
-const nodeTagReveal = keyframes({
-  '0%': { clipPath: 'inset(0 100% 0 0)', opacity: 0, transform: 'translateY(4px)' },
-  '60%': { opacity: 1 },
-  '100%': { clipPath: 'inset(0 0 0 0)', opacity: 1, transform: 'translateY(0)' },
-});
+/* Node info-box — a reversible left-to-right mask wipe. Reveals on
+   [data-active=true], plays the inverse (wipes back out) when it leaves.
+   65% black + backdrop blur so it reads over bright particles. */
 globalStyle('.snds-node-tag', {
-  animation: `${nodeTagReveal} 480ms cubic-bezier(0.16, 1, 0.3, 1) both`,
+  background: 'rgba(0, 0, 0, 0.65)',
+  // @ts-expect-error vendor-prefixed
+  WebkitBackdropFilter: 'blur(8px)',
+  backdropFilter: 'blur(8px)',
+  clipPath: 'inset(0 100% 0 0)',
+  opacity: 0,
+  transform: 'translateY(4px)',
+  transition:
+    'clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease, transform 420ms cubic-bezier(0.16, 1, 0.3, 1)',
   willChange: 'clip-path, opacity, transform',
+});
+globalStyle('.snds-node-tag[data-active="true"]', {
+  clipPath: 'inset(0 0 0 0)',
+  opacity: 1,
+  transform: 'translateY(0)',
 });
 
 /* Reset */
@@ -50,7 +60,7 @@ globalStyle('body', {
 
 globalStyle('h1, h2, h3, h4', {
   fontFamily: vars.font.display,
-  fontWeight: vars.weight.semibold,
+  fontWeight: vars.weight.regular,
   lineHeight: vars.lineHeight.tight,
   letterSpacing: vars.letterSpacing.tight,
 });
@@ -93,6 +103,45 @@ globalStyle('.skip-link', {
   transition: 'transform 160ms',
 });
 globalStyle('.skip-link:focus-visible', { transform: 'translateY(0)' });
+
+/* ---- persistent field layers (in Layout, survive view transitions) ---- */
+globalStyle('.field', { position: 'fixed', inset: 0, zIndex: 0 });
+
+/* mute overlay — transparent on home, dark + blurred on detail/work pages.
+   Animates on data-field change for the page transition. */
+globalStyle('.field-mute', {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 1,
+  pointerEvents: 'none',
+  opacity: 0,
+  background: 'rgba(6, 8, 12, 0)',
+  // @ts-expect-error vendor-prefixed
+  WebkitBackdropFilter: 'blur(0px)',
+  backdropFilter: 'blur(0px)',
+  transition: 'opacity 520ms ease, background 520ms ease, backdrop-filter 520ms ease, -webkit-backdrop-filter 520ms ease',
+});
+globalStyle('html[data-field="muted"] .field-mute', {
+  opacity: 1,
+  background: 'rgba(6, 8, 12, 0.72)',
+  // @ts-expect-error vendor-prefixed
+  WebkitBackdropFilter: 'blur(12px)',
+  backdropFilter: 'blur(12px)',
+});
+
+globalStyle('.grain', {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 3,
+  pointerEvents: 'none',
+  opacity: 0.05,
+  mixBlendMode: 'overlay',
+  backgroundImage:
+    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+});
+
+/* page content sits above the field + mute overlay */
+globalStyle('main, footer', { position: 'relative', zIndex: 2 });
 
 /* Honor reduced-motion globally */
 globalStyle('*', {

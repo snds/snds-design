@@ -1,12 +1,13 @@
 ---
 import { Sun, Moon } from '@phosphor-icons/react';
 import { url, home } from '../lib/paths';
+import Logo from './Logo.astro';
 ---
 
 <header class="hdr">
   <a href={home} class="hdr__brand" aria-label="SNDS — home">
-    <span class="hdr__mark" aria-hidden="true"></span>
-    SNDS
+    <Logo size={24} class="hdr__logo" />
+    <span class="hdr__word">SNDS</span>
   </a>
 
   <nav class="hdr__nav" aria-label="Primary">
@@ -14,8 +15,8 @@ import { url, home } from '../lib/paths';
     <a href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
     <a href="mailto:hello@snds.design">Contact</a>
     <button id="theme-toggle" class="hdr__toggle" type="button" aria-label="Toggle color theme">
-      <span class="ico ico--dark"><Moon size={16} weight="bold" /></span>
-      <span class="ico ico--light"><Sun size={16} weight="bold" /></span>
+      <span class="ico ico--sun" title="Switch to light"><Sun size={16} weight="regular" /></span>
+      <span class="ico ico--moon" title="Switch to dark"><Moon size={16} weight="regular" /></span>
     </button>
   </nav>
 </header>
@@ -34,54 +35,65 @@ import { url, home } from '../lib/paths';
     font-size: var(--snds-fontSize-caption);
     letter-spacing: var(--snds-letterSpacing-wide);
     text-transform: uppercase;
-    mix-blend-mode: difference; /* stays legible over the colored field */
+    /* theme-aware, with a soft shadow so it stays legible over the field */
+    text-shadow: 0 1px 16px rgba(0, 0, 0, 0.55);
   }
   .hdr__brand {
     display: inline-flex;
     align-items: center;
-    gap: var(--snds-space-2);
-    font-weight: 700;
-    color: #fff;
+    gap: var(--snds-space-3);
+    font-weight: 500;
+    color: var(--snds-color-fg);
     letter-spacing: 0.05em;
   }
-  .hdr__mark {
-    width: 10px; height: 10px;
-    background: #fff;
-    display: inline-block;
+  .hdr__logo {
+    display: block;
+    color: var(--snds-color-fg); /* currentColor → flips with theme */
+    filter: drop-shadow(0 1px 6px rgba(0, 0, 0, 0.45));
   }
   .hdr__nav {
     display: flex;
     align-items: center;
     gap: var(--snds-space-5);
   }
-  .hdr__nav a { color: #fff; opacity: 0.8; transition: opacity 120ms; }
-  .hdr__nav a:hover { opacity: 1; }
+  .hdr__nav a { color: var(--snds-color-fgMuted); transition: color 120ms; }
+  .hdr__nav a:hover { color: var(--snds-color-fg); }
   .hdr__toggle {
     display: grid;
     place-items: center;
     width: 30px; height: 30px;
-    color: #fff;
+    color: var(--snds-color-fg);
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.3);
+    border: 1px solid var(--snds-color-border);
     border-radius: var(--snds-radius-sm);
     cursor: pointer;
+    transition: border-color 120ms;
   }
+  .hdr__toggle:hover { border-color: var(--snds-color-borderStrong); }
   .hdr__toggle .ico { display: none; }
-  :global(html[data-theme='dark']) .ico--dark { display: grid; }
-  :global(html[data-theme='light']) .ico--light { display: grid; }
+  /* show the icon of the mode you'll switch TO */
+  :global(html[data-theme='dark']) .ico--sun { display: grid; }
+  :global(html[data-theme='light']) .ico--moon { display: grid; }
 
   @media (max-width: 560px) {
     .hdr__nav { gap: var(--snds-space-3); }
     .hdr__nav a:nth-child(2) { display: none; }
+    .hdr__word { display: none; }
   }
 </style>
 
 <script>
-  const btn = document.getElementById('theme-toggle');
-  btn?.addEventListener('click', () => {
-    const html = document.documentElement;
-    const next = html.dataset.theme === 'light' ? 'dark' : 'light';
-    html.dataset.theme = next;
-    try { localStorage.setItem('snds-theme', next); } catch {}
-  });
+  const bind = () => {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn || btn.dataset.bound) return;
+    btn.dataset.bound = 'true';
+    btn.addEventListener('click', () => {
+      const html = document.documentElement;
+      const next = html.dataset.theme === 'light' ? 'dark' : 'light';
+      html.dataset.theme = next;
+      try { localStorage.setItem('snds-theme', next); } catch {}
+    });
+  };
+  bind();
+  document.addEventListener('astro:page-load', bind);
 </script>

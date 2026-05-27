@@ -1,55 +1,75 @@
 ---
 import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
 import SiteHeader from './SiteHeader.astro';
 import SiteFooter from './SiteFooter.astro';
+import HeroCanvas from '../r3f/HeroCanvas';
 
 interface Props {
   title?: string;
   description?: string;
-  /** Hide the footer (the landing renders its own at the end of the scroll). */
   footer?: boolean;
+  /** 'home' = interactive field; 'muted' = calm, blurred, non-interactive. */
+  fieldMode?: 'home' | 'muted';
 }
 
 const {
   title = 'SNDS — AI, LLMs & Design Systems',
   description = 'Sean Sands — design systems, AI/LLM product work, and interactive engineering.',
   footer = true,
+  fieldMode = 'home',
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-field={fieldMode}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="preconnect" href="https://fonts.bunny.net" />
-    <!-- apply stored theme before paint to avoid a flash -->
+    <ClientRouter />
     <script is:inline>
-      try {
-        const t = localStorage.getItem('snds-theme');
-        if (t) document.documentElement.dataset.theme = t;
-      } catch (e) {}
+      // apply stored theme before paint + re-apply after each view transition
+      const applyTheme = () => {
+        try {
+          const t = localStorage.getItem('snds-theme');
+          if (t) document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      };
+      applyTheme();
+      document.addEventListener('astro:after-swap', applyTheme);
     </script>
     <slot name="head" />
   </head>
   <body>
     <a href="#main-content" class="skip-link">Skip to content</a>
+
+    <!-- persistent across navigations -->
+    <div class="field" transition:persist="field" aria-hidden="true">
+      <HeroCanvas client:only="react" />
+    </div>
+    <div class="field-mute" transition:persist="field-mute" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+
     <SiteHeader />
     <slot />
     {footer && <SiteFooter />}
+
     <script>
       import Lenis from 'lenis';
+      // init once; survives view transitions (window persists)
+      const w = window as unknown as { __lenis?: { raf: (t: number) => void } };
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (!reduce) {
+      if (!reduce && !w.__lenis) {
         const lenis = new Lenis({ lerp: 0.085, smoothWheel: true, wheelMultiplier: 1 });
         const raf = (time: number) => {
           lenis.raf(time);
           requestAnimationFrame(raf);
         };
         requestAnimationFrame(raf);
-        (window as unknown as { __lenis?: unknown }).__lenis = lenis;
+        w.__lenis = lenis;
       }
     </script>
   </body>
