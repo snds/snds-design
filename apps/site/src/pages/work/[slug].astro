@@ -81,13 +81,13 @@ const meta = [
 
     <nav class="cs__pager" aria-label="Case studies">
       {prev ? (
-        <a href={url(`/work/${prev.slug}`)} class="cs__pagerLink">
+        <a href={url(`/work/${prev.slug}`)} class="cs__pagerLink" data-astro-history="replace">
           <span class="cs__pagerDir">← Prev</span>
           <span class="cs__pagerName">{prev.title}</span>
         </a>
       ) : <span />}
       {next ? (
-        <a href={url(`/work/${next.slug}`)} class="cs__pagerLink cs__pagerLink--next">
+        <a href={url(`/work/${next.slug}`)} class="cs__pagerLink cs__pagerLink--next" data-astro-history="replace">
           <span class="cs__pagerDir">Next →</span>
           <span class="cs__pagerName">{next.title}</span>
         </a>

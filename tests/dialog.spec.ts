@@ -33,4 +33,19 @@ test.describe('case-study dialog', () => {
     await page.keyboard.press('Escape');
     await expect(page).toHaveURL(/\/snds-design\/$/);
   });
+
+  test('paging is lateral — one close returns home, not through each case', async ({ page }) => {
+    await page.goto('');
+    await page.locator('.caselink').first().click();
+    await page.waitForURL(/\/work\/[^/]+\/?$/);
+    // page forward a couple of times (each replaces history, never pushes)
+    await page.locator('.cs__pagerLink--next').click();
+    await page.waitForTimeout(500);
+    await page.locator('.cs__pagerLink--next').click();
+    await page.waitForTimeout(500);
+    await expect(page).toHaveURL(/\/work\/[^/]+\/?$/);
+    // a single close lands back on home
+    await page.locator('.cs__close').click();
+    await expect(page).toHaveURL(/\/snds-design\/$/);
+  });
 });
