@@ -35,11 +35,10 @@ import Logo from './Logo.astro';
     font-size: var(--snds-fontSize-caption);
     letter-spacing: var(--snds-letterSpacing-wide);
     text-transform: uppercase;
-    /* glass frame: 65% bg token + blur, with a hard boundary line */
-    background: color-mix(in srgb, var(--snds-color-bg) 65%, transparent);
+    /* glass frame: 50% bg token + blur is the boundary (no border) */
+    background: color-mix(in srgb, var(--snds-color-bg) 50%, transparent);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--snds-color-border);
   }
   .hdr__brand {
     display: inline-flex;
