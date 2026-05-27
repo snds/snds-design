@@ -15,35 +15,33 @@ function usePrefersReducedMotion() {
   return reduced;
 }
 
-/** Detail/work pages set <html data-field="muted">; the persisted canvas
-    reads it and calms + freezes the field. */
-function useFieldMuted() {
-  const [muted, setMuted] = useState(false);
+/** Dialog pages set <html data-field="dialog">; the persisted canvas reads it
+    and calms the camera + disables interaction, but keeps simulating. */
+function useFieldDialog() {
+  const [dialog, setDialog] = useState(false);
   useEffect(() => {
-    const read = () => setMuted(document.documentElement.dataset.field === 'muted');
+    const read = () => setDialog(document.documentElement.dataset.field === 'dialog');
     read();
     const obs = new MutationObserver(read);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-field'] });
     return () => obs.disconnect();
   }, []);
-  return muted;
+  return dialog;
 }
 
 export default function HeroCanvas() {
   const reduced = usePrefersReducedMotion();
-  const muted = useFieldMuted();
-  // freeze rendering when muted (behind a heavy blur) or reduced-motion
-  const still = reduced || muted;
+  const dialog = useFieldDialog();
   return (
     <Canvas
       camera={{ position: [0, 0, 5.5], fov: 50 }}
       dpr={[1, 2]}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
       style={{ position: 'absolute', inset: 0 }}
-      frameloop={still ? 'demand' : 'always'}
+      frameloop={reduced ? 'demand' : 'always'}
     >
-      <Nebula frozen={reduced || muted} />
-      <HeroField frozen={reduced} muted={muted} />
+      <Nebula frozen={reduced} />
+      <HeroField frozen={reduced} dialog={dialog} />
     </Canvas>
   );
 }

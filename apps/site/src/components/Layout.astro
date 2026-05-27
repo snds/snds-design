@@ -9,8 +9,9 @@ interface Props {
   title?: string;
   description?: string;
   footer?: boolean;
-  /** 'home' = interactive field; 'muted' = calm, blurred, non-interactive. */
-  fieldMode?: 'home' | 'muted';
+  /** 'home' = interactive field; 'dialog' = field keeps simulating behind a
+      dialog overlay (calm camera, no interaction). */
+  fieldMode?: 'home' | 'dialog';
 }
 
 const {
@@ -53,7 +54,8 @@ const {
     <div class="field-mute" transition:persist="field-mute" aria-hidden="true"></div>
     <div class="grain" aria-hidden="true"></div>
 
-    <SiteHeader />
+    <!-- header persists across navigations → unaffected by the dialog -->
+    <SiteHeader transition:persist="header" />
     <slot />
     {footer && <SiteFooter />}
 

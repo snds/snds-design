@@ -271,11 +271,12 @@ void main(){
 export interface HeroFieldProps {
   /** Reduced-motion: fully static. */
   frozen?: boolean;
-  /** Detail/work pages: sim frozen, no pointer, calm camera, no active node. */
-  muted?: boolean;
+  /** Dialog pages: field keeps simulating behind, but no interaction +
+      calm camera + no active node (the home UI is overlaid by a dialog). */
+  dialog?: boolean;
 }
 
-export function HeroField({ frozen = false, muted = false }: HeroFieldProps) {
+export function HeroField({ frozen = false, dialog = false }: HeroFieldProps) {
   const gl = useThree((s) => s.gl);
   const groupRef = useRef<THREE.Group>(null);
   const pointsRef = useRef<THREE.Points>(null);
@@ -493,7 +494,7 @@ export function HeroField({ frozen = false, muted = false }: HeroFieldProps) {
     const t = (v.uTime.value += frozen ? 0 : dt);
 
     let next = -1;
-    if (!frozen && !muted && typeof window !== 'undefined') {
+    if (!frozen && !dialog && typeof window !== 'undefined') {
       const vh = Math.max(window.innerHeight, 1);
       const idx = Math.round(window.scrollY / vh);
       next = idx >= 1 && idx <= NODES_3D.length ? idx - 1 : -1;
@@ -503,26 +504,31 @@ export function HeroField({ frozen = false, muted = false }: HeroFieldProps) {
       setActive(next);
     }
 
-    if (!frozen && !muted) {
+    // The sim keeps running in BOTH home and dialog modes (the field
+    // continues simulating behind the dialog). Dialog only disables the
+    // cursor light / interaction.
+    if (!frozen) {
       const lfo = 0.5 + 0.5 * Math.sin(t * 0.08);
       v.uFluid.value = 0.5 + Math.pow(lfo, 2.0) * 1.0;
       v.uSpring.value = 0.85 + (1.0 - lfo) * 0.3;
       v.uMorph.value = (0.5 + 0.5 * Math.sin(t * 0.035 + 1.2)) * 0.45;
 
-      ray.current.setFromCamera(ndc.current, state.camera);
-      if (ray.current.ray.intersectPlane(plane.current, hit.current)) {
-        pointerWorld.current.lerp(hit.current, 0.15);
+      if (!dialog) {
+        ray.current.setFromCamera(ndc.current, state.camera);
+        if (ray.current.ray.intersectPlane(plane.current, hit.current)) {
+          pointerWorld.current.lerp(hit.current, 0.15);
+        }
+        v.uPointer.value.copy(pointerWorld.current);
+        m.uniforms.uPointer.value.copy(pointerWorld.current);
+      } else {
+        v.uPointer.value.set(999, 999, 999);
+        m.uniforms.uPointer.value.set(999, 999, 999);
       }
-      v.uPointer.value.copy(pointerWorld.current);
-      m.uniforms.uPointer.value.copy(pointerWorld.current);
 
       v.dt.value = dt;
       sim.posVar.material.uniforms.dt.value = dt;
       sim.gpu.compute();
       if (groupRef.current) groupRef.current.rotation.y = 0;
-    } else if (muted) {
-      // detail/work pages: freeze sim, kill the cursor light
-      m.uniforms.uPointer.value.set(999, 999, 999);
     }
 
     // node markers: position bob + gradual scale
@@ -550,15 +556,15 @@ export function HeroField({ frozen = false, muted = false }: HeroFieldProps) {
       sim.uNodeStrength.value += (0.0 - sim.uNodeStrength.value) * 0.05;
     }
 
-    if (muted) {
-      // calm, slow auto-orbit; no scroll mapping, no mouse, fill → default
+    if (dialog) {
+      // calm, slow auto-orbit; soft ease so the home→dialog move is gentle
       const a = t * 0.04;
-      tmpV.current.copy(VIEW_DIRS[0]).applyAxisAngle(Y_AXIS, Math.sin(a) * 0.35).setLength(6.4);
-      tmpV.current.y += 0.5;
+      tmpV.current.copy(VIEW_DIRS[0]).applyAxisAngle(Y_AXIS, Math.sin(a) * 0.3).setLength(6.2);
+      tmpV.current.y += 0.4;
       camTarget.current.copy(tmpV.current);
-      state.camera.position.lerp(camTarget.current, 0.04);
+      state.camera.position.lerp(camTarget.current, 0.02);
       state.camera.lookAt(0, 0, 0);
-      m.uniforms.uFillColor.value.lerp(DEFAULT_FILL, 0.04);
+      m.uniforms.uFillColor.value.lerp(DEFAULT_FILL, 0.03);
     } else if (!frozen && typeof window !== 'undefined') {
       const N = NODES_3D.length;
       const vh = Math.max(window.innerHeight, 1);

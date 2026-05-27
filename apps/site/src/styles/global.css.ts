@@ -121,12 +121,13 @@ globalStyle('.field-mute', {
   backdropFilter: 'blur(0px)',
   transition: 'opacity 520ms ease, background 520ms ease, backdrop-filter 520ms ease, -webkit-backdrop-filter 520ms ease',
 });
-globalStyle('html[data-field="muted"] .field-mute', {
+globalStyle('html[data-field="dialog"] .field-mute', {
+  // light dim so the field keeps reading as live/simulating behind the dialog
   opacity: 1,
-  background: 'rgba(6, 8, 12, 0.72)',
+  background: 'rgba(6, 8, 12, 0.42)',
   // @ts-expect-error vendor-prefixed
-  WebkitBackdropFilter: 'blur(12px)',
-  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(4px)',
+  backdropFilter: 'blur(4px)',
 });
 
 globalStyle('.grain', {

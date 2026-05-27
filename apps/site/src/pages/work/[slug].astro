@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { X } from '@phosphor-icons/react';
 import Layout from '../../components/Layout.astro';
 import { CASE_STUDIES } from '../../data/caseStudies';
 import { url } from '../../lib/paths';
@@ -28,9 +29,14 @@ const meta = [
 ];
 ---
 
-<Layout title={`${d.title} — SNDS`} description={d.summary} fieldMode="muted">
+<Layout title={`${d.title} — SNDS`} description={d.summary} fieldMode="dialog" footer={false}>
   <main id="main-content" class="cs" style={`--accent:${accent}`}>
-    <a href={url('/work')} class="cs__back">← All work</a>
+    <div class="cs__bar">
+      <a href={url('/work')} class="cs__back">All work</a>
+      <button class="cs__close" type="button" aria-label="Close and return">
+        <X size={18} weight="regular" />
+      </button>
+    </div>
 
     <header class="cs__head">
       <p class="cs__num">{cs?.num ?? '—'} / 05 · {d.client}</p>
@@ -95,10 +101,23 @@ const meta = [
 </Layout>
 
 <style>
+  /* dialog panel — floats over the live field; field shows in the margins */
   .cs {
-    max-width: 880px;
-    margin-inline: auto;
-    padding: calc(var(--snds-space-16) + 40px) var(--snds-grid-margin) var(--snds-space-24);
+    position: relative;
+    max-width: 820px;
+    margin: calc(72px + var(--snds-space-6)) auto var(--snds-space-16);
+    background: color-mix(in srgb, var(--snds-color-bgElevated) 90%, transparent);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--snds-color-border);
+    border-radius: var(--snds-radius-lg);
+    padding: var(--snds-space-8) clamp(var(--snds-space-6), 5vw, var(--snds-space-12)) var(--snds-space-12);
+  }
+  .cs__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--snds-space-6);
   }
   .cs__back {
     font-family: var(--snds-font-mono);
@@ -108,6 +127,18 @@ const meta = [
     color: var(--snds-color-fgMuted);
   }
   .cs__back:hover { color: var(--snds-color-fg); }
+  .cs__close {
+    display: grid;
+    place-items: center;
+    width: 36px; height: 36px;
+    color: var(--snds-color-fg);
+    background: transparent;
+    border: 1px solid var(--snds-color-border);
+    border-radius: var(--snds-radius-full);
+    cursor: pointer;
+    transition: color 120ms, border-color 120ms;
+  }
+  .cs__close:hover { color: var(--accent); border-color: var(--accent); }
 
   .cs__head {
     margin: var(--snds-space-8) 0 var(--snds-space-10);
@@ -273,3 +304,20 @@ const meta = [
   .cs__pagerName { color: var(--snds-color-fg); font-size: var(--snds-fontSize-lead); }
   .cs__pagerLink:hover .cs__pagerName { color: var(--accent); }
 </style>
+
+<script>
+  const HOME = import.meta.env.BASE_URL;
+  const bindClose = () => {
+    document.querySelectorAll<HTMLButtonElement>('.cs__close').forEach((b) => {
+      if (b.dataset.bound) return;
+      b.dataset.bound = 'true';
+      b.addEventListener('click', () => {
+        // return to where we came from (restores scroll); else go home
+        if (window.history.length > 1) window.history.back();
+        else window.location.assign(HOME);
+      });
+    });
+  };
+  bindClose();
+  document.addEventListener('astro:page-load', bindClose);
+</script>
