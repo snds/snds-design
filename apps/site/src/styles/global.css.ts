@@ -133,6 +133,25 @@ globalStyle('.skip-link', {
 });
 globalStyle('.skip-link:focus-visible', { transform: 'translateY(0)' });
 
+/* ---- "living glass" surface system (experimental) ----
+   Chrome surfaces (dialog, later header/footer) inherit colour from the field:
+   a tint mixed into the body, an accent-tinted border, an accent-coloured
+   contact shadow, and a soft top light. Strengths are tokenized here so they
+   tune in one place and can graduate into the formal token contract. A surface
+   supplies its source colour via --field-tint (falls back to the in-scope
+   --accent); typography stays on the opaque body so contrast is preserved. */
+globalStyle(':root', {
+  vars: {
+    '--snds-glass-blur': '14px',
+    '--snds-glass-saturate': '1.4',
+    '--snds-glass-opacity': '90%', // body opacity; the remainder is field bleed
+    '--snds-glass-tint': '12%', // field colour mixed into the body
+    '--snds-glass-border': '38%', // field colour mixed into the border
+    '--snds-glass-shade': '24%', // field-coloured contact shadow
+    '--snds-glass-light': '22%', // field-tinted top highlight
+  },
+});
+
 /* ---- persistent field layers (in Layout, survive view transitions) ---- */
 // overflow:hidden clips the 3D-projected <Html> field labels that can land
 // past the viewport edge — without it they extend the document width and leave
