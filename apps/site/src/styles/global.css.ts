@@ -152,8 +152,9 @@ globalStyle(':root', {
     '--snds-glow-core-size': '40%', // hotspot radius (softer, diffuses into halo)
     '--snds-glow-intensity': '34%', // diffuse halo strength (× distance)
     '--snds-glow-size': '72%', // halo reach
-    '--snds-glow-border': '72%', // border tint strength at the node (screen-blended)
-    '--snds-glow-border-size': '130%', // border mask reach (must touch the frame)
+    '--snds-glow-border': '72%', // border node-colour strength along the ring (screen-blended)
+    '--snds-glow-border-hot': '55%', // white blended into the border at the hot core
+    '--snds-glow-border-size': '130%', // radial reach of the border colour
     '--snds-glow-border-floor': '0.28', // base edge light around the whole frame
   },
 });

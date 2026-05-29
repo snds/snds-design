@@ -149,14 +149,24 @@ const meta = [
     inset: 0;
     z-index: 2;
     pointer-events: none;
-    border: 1px solid color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-border) * max(var(--snds-glow-floor), var(--glow-strength, 1))), transparent);
+    padding: 1px; /* ring thickness */
     border-radius: inherit;
     mix-blend-mode: screen; /* hottest border segment reads as brighter light */
     opacity: var(--glow-on, 0);
     transition: opacity 400ms ease;
-    /* full at the node, easing to a dim base around the whole frame (edge light) */
-    -webkit-mask: radial-gradient(var(--snds-glow-border-size) var(--snds-glow-border-size) at var(--glow-x, 50%) var(--glow-y, -10%), #000 0%, rgba(0, 0, 0, var(--snds-glow-border-floor)) 100%);
-    mask: radial-gradient(var(--snds-glow-border-size) var(--snds-glow-border-size) at var(--glow-x, 50%) var(--glow-y, -10%), #000 0%, rgba(0, 0, 0, var(--snds-glow-border-floor)) 100%);
+    /* a colour gradient ALONG the frame: whitens toward the hot core (only when
+       the node is near the edge), node-colour spreading, dim base all around. */
+    background: radial-gradient(
+      var(--snds-glow-border-size) var(--snds-glow-border-size) at var(--glow-x, 50%) var(--glow-y, -10%),
+      color-mix(in srgb, #fff calc(var(--snds-glow-border-hot) * max(var(--snds-glow-floor), var(--glow-strength, 1))), var(--glow-color, var(--accent))) 0%,
+      color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-border) * max(var(--snds-glow-floor), var(--glow-strength, 1))), transparent) 28%,
+      color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-border) * var(--snds-glow-border-floor) * max(var(--snds-glow-floor), var(--glow-strength, 1))), transparent) 100%
+    );
+    /* clip the gradient to the 1px ring (border-box minus content-box) */
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
   }
   .cs > * { position: relative; z-index: 1; } /* content between glow and border */
   /* close — anchored top-right of the hero header */

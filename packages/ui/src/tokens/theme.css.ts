@@ -10,7 +10,7 @@
    layer is mapped ONCE and light mode works automatically when the
    palette vars flip.
    ============================================================ */
-import { createGlobalTheme, createGlobalThemeContract } from '@vanilla-extract/css';
+import { createGlobalTheme, createGlobalThemeContract, globalStyle } from '@vanilla-extract/css';
 import {
   slate, slateDark,
   cyan, cyanDark,
@@ -209,9 +209,12 @@ createGlobalTheme(':root', vars.color, {
   fgDisabled: palette.neutral[8],
   fgOnAccent: '#ffffff',
 
-  border: palette.neutral[7],
-  borderSubtle: palette.neutral[6],
-  borderStrong: palette.neutral[8],
+  // Neutral translucent borders (dark theme = white) so they INHERIT colour
+  // from glows/field behind them rather than reading as opaque grey. Light
+  // theme flips to black below.
+  border: 'color-mix(in srgb, #fff 24%, transparent)',
+  borderSubtle: 'color-mix(in srgb, #fff 12%, transparent)',
+  borderStrong: 'color-mix(in srgb, #fff 36%, transparent)',
   borderFocus: palette.primary[8],
 
   primary: palette.primary[9],
@@ -224,6 +227,16 @@ createGlobalTheme(':root', vars.color, {
   signalHover: palette.signal[10],
   signalSubtle: palette.signal[3],
   signalFg: palette.signal[11],
+});
+
+// Light theme flips the translucent borders to black so they still read and
+// can inherit colour from glows on a light surface.
+globalStyle('[data-theme="light"]', {
+  vars: {
+    '--snds-color-border': 'color-mix(in srgb, #000 24%, transparent)',
+    '--snds-color-borderSubtle': 'color-mix(in srgb, #000 12%, transparent)',
+    '--snds-color-borderStrong': 'color-mix(in srgb, #000 36%, transparent)',
+  },
 });
 
 // Static (non-theme) tokens. Font stacks are placeholders until the
