@@ -12,6 +12,10 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
+  // Each page runs the WebGL field; cap parallelism + retry so GPU contention
+  // (slow page loads / view-transition timeouts) doesn't flake the deploy gate.
+  workers: process.env.CI ? 2 : 4,
+  retries: process.env.CI ? 2 : 1,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: BASE,

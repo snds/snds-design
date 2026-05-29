@@ -144,9 +144,11 @@ globalStyle(':root', {
   vars: {
     '--snds-glass-blur': '14px',
     '--snds-glass-saturate': '1.4',
-    '--snds-glass-opacity': '90%', // body opacity; remainder is field bleed
-    '--snds-glow-intensity': '50%', // colour strength at the glow centre
-    '--snds-glow-size': '75%', // radial reach → how far the light diffuses
+    '--snds-glass-opacity': '82%', // body opacity; remainder is field bleed (glass stays see-through)
+    '--snds-glow-intensity': '42%', // centre strength; multiplied by --glow-strength (distance)
+    '--snds-glow-size': '68%', // radial reach → how far the light diffuses
+    '--snds-glow-border': '70%', // border tint strength at the node
+    '--snds-glow-border-size': '48%', // border-tint falloff reach
   },
 });
 

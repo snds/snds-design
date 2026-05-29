@@ -573,14 +573,19 @@ export function HeroField({ frozen = false, dialog = false, light = false }: Her
     // "node = lightbulb": publish the active node's projected position to the
     // dialog panel (panel-relative px) so it catches the light locally.
     if (dialog && ai >= 0 && nodeRefs.current[ai] && csEl.current) {
-      tmpV.current.copy(nodeRefs.current[ai]!.position).project(state.camera);
+      const node = nodeRefs.current[ai]!;
+      tmpV.current.copy(node.position).project(state.camera);
       const sx = (tmpV.current.x * 0.5 + 0.5) * state.size.width;
       const sy = (-tmpV.current.y * 0.5 + 0.5) * state.size.height;
+      // distance from the glass (camera): near → bright, far → dim, eased
+      const dist = node.position.distanceTo(state.camera.position);
+      const strength = THREE.MathUtils.clamp((8.6 - dist) / (8.6 - 3.8), 0, 1);
       const r = csEl.current.getBoundingClientRect();
       const s = csEl.current.style;
       s.setProperty('--glow-x', `${(sx - r.left).toFixed(1)}px`);
       s.setProperty('--glow-y', `${(sy - r.top).toFixed(1)}px`);
       s.setProperty('--glow-color', `#${NODES_3D[ai].color.getHexString()}`);
+      s.setProperty('--glow-strength', (strength * strength).toFixed(3));
       s.setProperty('--glow-on', tmpV.current.z < 1 ? '1' : '0');
     }
 

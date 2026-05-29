@@ -114,8 +114,9 @@ const meta = [
     padding: var(--snds-space-8) clamp(var(--snds-space-6), 5vw, var(--snds-space-12)) var(--snds-space-12);
   }
   /* The node's light caught locally on the glass: a radial glow at the node's
-     projected position (--glow-x/--glow-y, panel-relative, published by the
-     field), fading out — a corner node lights only that corner. */
+     projected position (--glow-x/--glow-y, panel-relative). Screen blend so it
+     reads as LIGHT (additive), not opaque paint; --glow-strength dims it with
+     the node's distance from the glass; falls off radially. */
   .cs::before {
     content: '';
     position: absolute;
@@ -123,15 +124,31 @@ const meta = [
     z-index: 0;
     pointer-events: none;
     border-radius: inherit;
+    mix-blend-mode: screen;
     opacity: var(--glow-on, 0);
     transition: opacity 400ms ease;
     background: radial-gradient(
       var(--snds-glow-size) var(--snds-glow-size) at var(--glow-x, 50%) var(--glow-y, -10%),
-      color-mix(in srgb, var(--glow-color, var(--accent)) var(--snds-glow-intensity), transparent) 0%,
+      color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-intensity) * var(--glow-strength, 1)), transparent) 0%,
       transparent 100%
     );
   }
-  .cs > * { position: relative; z-index: 1; } /* content above the glow */
+  /* tinted border — colour the frame only where the node is near it, fading
+     around (radial mask) and dimming with distance (--glow-strength). */
+  .cs::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    border: 1px solid color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-border) * var(--glow-strength, 1)), transparent);
+    border-radius: inherit;
+    opacity: var(--glow-on, 0);
+    transition: opacity 400ms ease;
+    -webkit-mask: radial-gradient(var(--snds-glow-border-size) var(--snds-glow-border-size) at var(--glow-x, 50%) var(--glow-y, -10%), #000 0%, transparent 100%);
+    mask: radial-gradient(var(--snds-glow-border-size) var(--snds-glow-border-size) at var(--glow-x, 50%) var(--glow-y, -10%), #000 0%, transparent 100%);
+  }
+  .cs > * { position: relative; z-index: 1; } /* content between glow and border */
   /* close — anchored top-right of the hero header */
   .cs__close {
     position: absolute;
