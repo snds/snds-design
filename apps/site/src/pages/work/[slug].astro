@@ -271,7 +271,8 @@ const meta = [
     margin-bottom: var(--snds-space-12);
   }
   .cs__metrics li {
-    background: var(--snds-color-bg);
+    /* low-opacity surface (like the glass) so the blocks inherit the glow */
+    background: color-mix(in srgb, var(--snds-color-bgElevated) 50%, transparent);
     padding: var(--snds-space-5);
     display: flex;
     flex-direction: column;
