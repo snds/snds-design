@@ -134,21 +134,19 @@ globalStyle('.skip-link', {
 globalStyle('.skip-link:focus-visible', { transform: 'translateY(0)' });
 
 /* ---- "living glass" surface system (experimental) ----
-   Chrome surfaces (dialog, later header/footer) inherit colour from the field:
-   a tint mixed into the body, an accent-tinted border, an accent-coloured
-   contact shadow, and a soft top light. Strengths are tokenized here so they
-   tune in one place and can graduate into the formal token contract. A surface
-   supplies its source colour via --field-tint (falls back to the in-scope
-   --accent); typography stays on the opaque body so contrast is preserved. */
+   The project's node in the field is a point light. Frosted surfaces catch it
+   LOCALLY: a radial glow positioned where the node projects on screen, with
+   falloff, so a node near a corner lights only that corner. The field
+   publishes the node's panel-relative position (--glow-x/--glow-y), colour
+   (--glow-color) and visibility (--glow-on); strengths are tokenized here.
+   Typography stays on the near-opaque body so contrast is preserved. */
 globalStyle(':root', {
   vars: {
     '--snds-glass-blur': '14px',
     '--snds-glass-saturate': '1.4',
-    '--snds-glass-opacity': '90%', // body opacity; the remainder is field bleed
-    '--snds-glass-tint': '12%', // field colour mixed into the body
-    '--snds-glass-border': '38%', // field colour mixed into the border
-    '--snds-glass-shade': '24%', // field-coloured contact shadow
-    '--snds-glass-light': '22%', // field-tinted top highlight
+    '--snds-glass-opacity': '90%', // body opacity; remainder is field bleed
+    '--snds-glow-intensity': '50%', // colour strength at the glow centre
+    '--snds-glow-size': '75%', // radial reach → how far the light diffuses
   },
 });
 

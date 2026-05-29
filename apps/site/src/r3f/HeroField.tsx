@@ -295,6 +295,7 @@ export function HeroField({ frozen = false, dialog = false, light = false }: Her
   const [active, setActive] = useState(-1);
   const activeRef = useRef(-1);
   const nodeRefs = useRef<Array<THREE.Group | null>>([]);
+  const csEl = useRef<HTMLElement | null>(null); // dialog panel (for glow projection)
   const scaleRefs = useRef<Array<THREE.Group | null>>([]);
   const scaleVal = useRef<number[]>(NODES_3D.map(() => 1));
   const camTarget = useRef(new THREE.Vector3(0, 0, 5.5));
@@ -496,10 +497,21 @@ export function HeroField({ frozen = false, dialog = false, light = false }: Her
     const t = (v.uTime.value += frozen ? 0 : dt);
 
     let next = -1;
-    if (!frozen && !dialog && typeof window !== 'undefined') {
-      const vh = Math.max(window.innerHeight, 1);
-      const idx = Math.round(window.scrollY / vh);
-      next = idx >= 1 && idx <= NODES_3D.length ? idx - 1 : -1;
+    if (typeof window !== 'undefined') {
+      if (dialog) {
+        // a dialog lights the node for the case it's showing (read off the panel)
+        if (!csEl.current || !csEl.current.isConnected) {
+          csEl.current = document.querySelector('.cs');
+        }
+        const di = csEl.current?.dataset.nodeIndex;
+        if (di != null && di !== '') {
+          next = Math.min(Math.max(parseInt(di, 10) || 0, 0), NODES_3D.length - 1);
+        }
+      } else if (!frozen) {
+        const vh = Math.max(window.innerHeight, 1);
+        const idx = Math.round(window.scrollY / vh);
+        next = idx >= 1 && idx <= NODES_3D.length ? idx - 1 : -1;
+      }
     }
     if (next !== activeRef.current) {
       activeRef.current = next;
@@ -556,6 +568,20 @@ export function HeroField({ frozen = false, dialog = false, light = false }: Her
       sim.uNodeStrength.value += (1.0 - sim.uNodeStrength.value) * 0.05;
     } else {
       sim.uNodeStrength.value += (0.0 - sim.uNodeStrength.value) * 0.05;
+    }
+
+    // "node = lightbulb": publish the active node's projected position to the
+    // dialog panel (panel-relative px) so it catches the light locally.
+    if (dialog && ai >= 0 && nodeRefs.current[ai] && csEl.current) {
+      tmpV.current.copy(nodeRefs.current[ai]!.position).project(state.camera);
+      const sx = (tmpV.current.x * 0.5 + 0.5) * state.size.width;
+      const sy = (-tmpV.current.y * 0.5 + 0.5) * state.size.height;
+      const r = csEl.current.getBoundingClientRect();
+      const s = csEl.current.style;
+      s.setProperty('--glow-x', `${(sx - r.left).toFixed(1)}px`);
+      s.setProperty('--glow-y', `${(sy - r.top).toFixed(1)}px`);
+      s.setProperty('--glow-color', `#${NODES_3D[ai].color.getHexString()}`);
+      s.setProperty('--glow-on', tmpV.current.z < 1 ? '1' : '0');
     }
 
     if (dialog) {
