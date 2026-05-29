@@ -151,10 +151,12 @@ const meta = [
     pointer-events: none;
     border: 1px solid color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-border) * max(var(--snds-glow-floor), var(--glow-strength, 1))), transparent);
     border-radius: inherit;
+    mix-blend-mode: screen; /* hottest border segment reads as brighter light */
     opacity: var(--glow-on, 0);
     transition: opacity 400ms ease;
-    -webkit-mask: radial-gradient(var(--snds-glow-border-size) var(--snds-glow-border-size) at var(--glow-x, 50%) var(--glow-y, -10%), #000 0%, transparent 100%);
-    mask: radial-gradient(var(--snds-glow-border-size) var(--snds-glow-border-size) at var(--glow-x, 50%) var(--glow-y, -10%), #000 0%, transparent 100%);
+    /* full at the node, easing to a dim base around the whole frame (edge light) */
+    -webkit-mask: radial-gradient(var(--snds-glow-border-size) var(--snds-glow-border-size) at var(--glow-x, 50%) var(--glow-y, -10%), #000 0%, rgba(0, 0, 0, var(--snds-glow-border-floor)) 100%);
+    mask: radial-gradient(var(--snds-glow-border-size) var(--snds-glow-border-size) at var(--glow-x, 50%) var(--glow-y, -10%), #000 0%, rgba(0, 0, 0, var(--snds-glow-border-floor)) 100%);
   }
   .cs > * { position: relative; z-index: 1; } /* content between glow and border */
   /* close — anchored top-right of the hero header */
