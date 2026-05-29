@@ -127,11 +127,19 @@ const meta = [
     mix-blend-mode: screen;
     opacity: var(--glow-on, 0);
     transition: opacity 400ms ease;
-    background: radial-gradient(
-      var(--snds-glow-size) var(--snds-glow-size) at var(--glow-x, 50%) var(--glow-y, -10%),
-      color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-intensity) * var(--glow-strength, 1)), transparent) 0%,
-      transparent 100%
-    );
+    background:
+      /* hot core — persists as a hotspot even when the node is far back */
+      radial-gradient(
+        var(--snds-glow-core-size) var(--snds-glow-core-size) at var(--glow-x, 50%) var(--glow-y, -10%),
+        color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-core) * max(var(--snds-glow-floor), var(--glow-strength, 1))), transparent) 0%,
+        transparent 100%
+      ),
+      /* diffuse halo — spreads and fades fully with distance */
+      radial-gradient(
+        var(--snds-glow-size) var(--snds-glow-size) at var(--glow-x, 50%) var(--glow-y, -10%),
+        color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-intensity) * var(--glow-strength, 1)), transparent) 0%,
+        transparent 100%
+      );
   }
   /* tinted border — colour the frame only where the node is near it, fading
      around (radial mask) and dimming with distance (--glow-strength). */
@@ -141,7 +149,7 @@ const meta = [
     inset: 0;
     z-index: 2;
     pointer-events: none;
-    border: 1px solid color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-border) * var(--glow-strength, 1)), transparent);
+    border: 1px solid color-mix(in srgb, var(--glow-color, var(--accent)) calc(var(--snds-glow-border) * max(var(--snds-glow-floor), var(--glow-strength, 1))), transparent);
     border-radius: inherit;
     opacity: var(--glow-on, 0);
     transition: opacity 400ms ease;

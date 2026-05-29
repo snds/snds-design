@@ -145,10 +145,15 @@ globalStyle(':root', {
     '--snds-glass-blur': '14px',
     '--snds-glass-saturate': '1.4',
     '--snds-glass-opacity': '82%', // body opacity; remainder is field bleed (glass stays see-through)
-    '--snds-glow-intensity': '42%', // centre strength; multiplied by --glow-strength (distance)
-    '--snds-glow-size': '68%', // radial reach → how far the light diffuses
-    '--snds-glow-border': '70%', // border tint strength at the node
-    '--snds-glow-border-size': '48%', // border-tint falloff reach
+    // the light has two parts: a tight hot CORE that persists as a hotspot
+    // (floored, barely dims with distance) + a diffuse HALO that fades fully.
+    '--snds-glow-floor': '0.4', // min multiplier so the core/border never vanish
+    '--snds-glow-core': '72%', // hotspot strength at the node centre
+    '--snds-glow-core-size': '20%', // hotspot radius (small + bright)
+    '--snds-glow-intensity': '36%', // diffuse halo strength (× distance)
+    '--snds-glow-size': '70%', // halo reach
+    '--snds-glow-border': '66%', // border tint strength at the node
+    '--snds-glow-border-size': '120%', // border mask reach (must touch the frame)
   },
 });
 
