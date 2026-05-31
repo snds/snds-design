@@ -36,6 +36,7 @@ import Switch from './Switch.astro';
       <dl>
         <div><dt><kbd>?</kbd></dt><dd>Show this help</dd></div>
         <div><dt><kbd>T</kbd></dt><dd>Toggle light / dark theme</dd></div>
+        <div><dt><kbd>Shift</kbd> <kbd>H</kbd></dt><dd>Hide interface (screen-grab mode)</dd></div>
         <div><dt><kbd>Esc</kbd></dt><dd>Close dialog or help</dd></div>
       </dl>
     </section>
@@ -237,6 +238,14 @@ import Switch from './Switch.astro';
     syncSwitches();
   };
 
+  // Screen-grab mode: hide all chrome (header, rail, content, footer) so the
+  // particle field can be captured clean. Ephemeral — not persisted, so a
+  // reload always brings the UI back.
+  const toggleChrome = () => {
+    if (root().dataset.chrome === 'hidden') delete root().dataset.chrome;
+    else root().dataset.chrome = 'hidden';
+  };
+
   // Reflect current state onto the settings switches.
   const syncSwitches = () => {
     document.getElementById('set-theme')?.setAttribute('aria-checked', String(root().dataset.theme === 'light'));
@@ -269,6 +278,7 @@ import Switch from './Switch.astro';
       if (isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
       const help = document.getElementById('help-dialog') as HTMLDialogElement | null;
       if (e.key === '?') { e.preventDefault(); if (help && !help.open) { syncSwitches(); help.showModal(); } }
+      else if (e.shiftKey && (e.key === 'H' || e.key === 'h')) { e.preventDefault(); toggleChrome(); }
       else if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleTheme(); }
     });
   }

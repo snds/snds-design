@@ -211,6 +211,29 @@ globalStyle('html[data-field="home"] body', {
   WebkitUserSelect: 'none',
 });
 
+/* ---- screen-grab mode ----
+   Shift+H toggles data-chrome="hidden" on <html> (set in SiteHeader's global
+   keydown handler). It fades out every UI layer — header, section rail, page
+   content, footer, node labels — leaving the bare particle field for clean
+   captures. The field's own aesthetics (.grain, .field-mute) are NOT chrome and
+   stay. Ephemeral by design: a reload restores the UI. */
+globalStyle('.hdr, .rail, main, footer', {
+  transition: 'opacity 320ms ease',
+});
+globalStyle(
+  [
+    'html[data-chrome="hidden"] .hdr',
+    'html[data-chrome="hidden"] .rail',
+    'html[data-chrome="hidden"] main',
+    'html[data-chrome="hidden"] footer',
+    'html[data-chrome="hidden"] .snds-node-tag',
+  ].join(', '),
+  {
+    opacity: 0,
+    pointerEvents: 'none',
+  },
+);
+
 /* Honor reduced-motion globally */
 globalStyle('*', {
   '@media': {
